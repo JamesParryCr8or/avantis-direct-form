@@ -1,6 +1,5 @@
 const GHL_URL     = 'https://services.leadconnectorhq.com';
 const LOCATION_ID = '8qkx5Hada8mesjOqMckj';
-const WORKFLOW_ID = '07b0fd6c-7eb8-466a-bc09-e1035a6acf80';
 const AT_BASE     = 'appwmu552AUleDadr';
 const AT_TABLE    = 'tblUlFciubEeVTFm7';
 
@@ -38,7 +37,8 @@ module.exports = async function handler(req, res) {
         phone,
         companyName,
         locationId: LOCATION_ID,
-        source:     'Avantis Direct Form',
+        source:     'public api',
+        tags:       ['website'],
         customFields: [
           recordId    ? { id: 'S1KufkT83xxvvbPh4RAk', fieldValue: recordId }    : null,
           reviewUrl   ? { id: '7Fk4WaOYtd3AjtNSgTPv', fieldValue: reviewUrl }   : null,
@@ -72,30 +72,6 @@ module.exports = async function handler(req, res) {
         console.log('Airtable GHL ID saved:', atRes.status, JSON.stringify(atData).slice(0, 200));
       } catch (err) {
         console.error('Airtable GHL ID error:', err);
-      }
-    }
-
-    // 3. Add to onboarding workflow (5s timeout so it never blocks the response)
-    if (contactId) {
-      try {
-        const ctrl   = new AbortController();
-        const timer  = setTimeout(() => ctrl.abort(), 5000);
-        const wfRes  = await fetch(`${GHL_URL}/contacts/${contactId}/workflow/${WORKFLOW_ID}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type':  'application/json',
-            'Accept':        'application/json',
-            'Authorization': `Bearer ${GHL_TOKEN}`,
-            'Version':       '2021-07-28',
-          },
-          body: JSON.stringify({ eventStartTime: new Date().toISOString() }),
-          signal: ctrl.signal,
-        });
-        clearTimeout(timer);
-        const wfText = await wfRes.text();
-        console.log('GHL workflow:', wfRes.status, wfText);
-      } catch (err) {
-        console.error('GHL workflow error:', err.name === 'AbortError' ? 'timed out' : err);
       }
     }
 
