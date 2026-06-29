@@ -1315,6 +1315,16 @@
       const company = noCompanySelected ? 'No registered company' : document.getElementById('f-company').value.trim();
       const companyNumber = selectedCompany ? selectedCompany.number : '';
 
+      // Lock in the sole-trader flag based on final state at submit time
+      // (overrides anything stale from localStorage draft restore)
+      try {
+        if (noCompanySelected) {
+          sessionStorage.setItem('avantis_sole_trader', '1');
+        } else {
+          sessionStorage.removeItem('avantis_sole_trader');
+        }
+      } catch {}
+
       // Save to sessionStorage so Page2 can prefill instantly (even if Airtable fails)
       try {
         sessionStorage.setItem('avantis_form_data', JSON.stringify({
