@@ -1055,6 +1055,10 @@
           const el = document.getElementById(id);
           if (el) el.style.display = 'none';
         });
+        // Hide director dropdown — go straight to manual entry
+        const dirField = document.getElementById('director-select-field');
+        if (dirField) dirField.style.display = 'none';
+        onDirectorSelect('__manual');
         // Update left panel
         const disp = document.getElementById('name-display');
         if (disp) disp.textContent = 'your business';
