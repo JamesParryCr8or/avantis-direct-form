@@ -430,6 +430,134 @@
 
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
+    // UK SIC 2007 code → human-readable description
+    const SIC = {
+      // Agriculture
+      '01110':'Arable farming','01210':'Viticulture','01500':'Mixed farming',
+      // Food & drink manufacturing
+      '10110':'Meat processing','10200':'Fish processing','10310':'Potato processing',
+      '10410':'Oils & fats','10510':'Dairy','10611':'Flour milling','10620':'Starch products',
+      '10710':'Bread & bakery','10720':'Biscuits & pastry','10730':'Pasta','10810':'Sugar',
+      '10821':'Cocoa & chocolate','10822':'Confectionery','10910':'Animal feed',
+      '11010':'Distilling spirits','11020':'Wine','11030':'Cider','11040':'Beer',
+      '11050':'Brewing','11060':'Malt','11070':'Soft drinks',
+      // Construction
+      '41100':'Property development','41201':'Commercial construction','41202':'House building',
+      '42110':'Road construction','43110':'Demolition','43120':'Site preparation',
+      '43210':'Electrical installation','43220':'Plumbing & heating','43290':'Construction installation',
+      '43310':'Plastering','43320':'Joinery','43330':'Flooring','43341':'Painting & decorating',
+      '43342':'Glazing','43390':'Building completion','43910':'Roofing activities',
+      '43999':'Specialist construction',
+      // Motor trade
+      '45111':'New car sales','45112':'Used car sales','45190':'Other vehicle sales',
+      '45200':'Vehicle repair & maintenance','45310':'Motor parts wholesale',
+      '45320':'Motor parts retail','45400':'Motorcycle sales & repair',
+      // Wholesale
+      '46130':'Food, beverages & tobacco agents','46190':'Other trade agents',
+      '46340':'Beverages wholesale','46382':'Tea, coffee & spices wholesale',
+      // Retail
+      '47110':'Convenience & supermarket retail','47190':'Other general retail',
+      '47210':'Fruit & vegetable retail','47220':'Meat retail','47230':'Fish retail',
+      '47240':'Bakery retail','47250':'Beverages retail','47260':'Tobacco retail',
+      '47290':'Other food retail','47300':'Fuel retail','47410':'Computer retail',
+      '47420':'Telecoms equipment retail','47430':'Audio/video retail',
+      '47510':'Textiles retail','47520':'DIY & hardware retail','47530':'Carpet & flooring retail',
+      '47540':'Electrical appliances retail','47591':'Musical instruments retail',
+      '47592':'Toy & games retail','47593':'Sports equipment retail',
+      '47599':'Furniture & household retail','47610':'Book retail','47620':'Newsagent & stationery',
+      '47630':'Music & video retail','47640':'Sports goods retail','47650':'Games & toys retail',
+      '47710':'Clothing retail','47720':'Footwear & leather retail',
+      '47730':'Pharmacy & health retail','47740':'Medical & orthopaedic retail',
+      '47750':'Cosmetics & beauty retail','47760':'Garden & flower retail',
+      '47770':'Jewellery & watch retail','47780':'Specialised retail','47790':'Second-hand goods retail',
+      '47810':'Market stall – food','47820':'Market stall – textiles','47890':'Market stall – other',
+      '47910':'Online retail','47990':'Other non-store retail',
+      // Transport & storage
+      '49100':'Passenger rail','49200':'Freight rail','49310':'Bus & coach',
+      '49320':'Taxi & private hire','49390':'Other passenger transport',
+      '49410':'Road haulage','49420':'Removal services','50100':'Sea passenger transport',
+      '51101':'Airline – scheduled','51102':'Airline – non-scheduled','52100':'Warehousing',
+      '52210':'Motorway services','52290':'Other transport support','53100':'Royal Mail',
+      '53201':'Courier activities','53202':'Other postal/courier',
+      // Accommodation
+      '55100':'Hotels & similar accommodation','55201':'Holiday centres','55202':'Youth hostels',
+      '55209':'Other short-stay accommodation','55300':'Caravan & camping sites','55900':'Other accommodation',
+      // Food & beverage service
+      '56101':'Licensed restaurant','56102':'Café & unlicensed restaurant',
+      '56103':'Takeaway & mobile food','56210':'Event catering','56290':'Other food service',
+      '56301':'Licensed club','56302':'Pub & bar',
+      // IT & technology
+      '58210':'Computer games publishing','58290':'Other software publishing',
+      '62011':'Computer programming','62012':'Software development',
+      '62020':'IT consultancy','62030':'IT facilities management','62090':'Other IT services',
+      '63110':'Data processing & hosting','63120':'Web portals','63910':'News agency',
+      '63990':'Other information services',
+      // Finance & insurance
+      '64110':'Central banking','64190':'Banking','64205':'Venture capital',
+      '64303':'Fund management','64991':'Security dealing','64999':'Other financial services',
+      '65110':'Life insurance','65120':'Non-life insurance','65201':'Life reinsurance',
+      '66110':'Financial market administration','66120':'Security dealing',
+      '66190':'Financial services support','66210':'Insurance risk evaluation',
+      '66220':'Insurance brokerage','66290':'Other insurance support','66300':'Fund management',
+      // Real estate
+      '68100':'Property buying & selling','68201':'Residential property letting',
+      '68202':'Social housing letting','68209':'Other property letting','68310':'Estate agents',
+      '68320':'Property management',
+      // Professional services
+      '69101':'Barristers','69102':'Solicitors','69201':'Accounting & auditing',
+      '69202':'Bookkeeping','69203':'Tax consultancy','70100':'Head office management',
+      '70221':'Financial management','70229':'Management consultancy',
+      '71111':'Architecture','71112':'Urban planning & landscape',
+      '71121':'Engineering design','71122':'Engineering project management','71129':'Other engineering',
+      '71200':'Technical testing & analysis','72110':'Biotech R&D','72190':'Natural science R&D',
+      '72200':'Social science R&D','73110':'Advertising agencies','73120':'Media representation',
+      '73200':'Market research','74100':'Design & branding','74201':'Photography',
+      '74202':'Other photography','74300':'Translation & interpreting',
+      '74901':'Patent & copyright','74909':'Other professional activities',
+      // Admin & support
+      '77110':'Car & van rental','77120':'Truck rental','77200':'Personal goods rental',
+      '77330':'Office machinery rental','77400':'Leasing & licensing',
+      '78101':'Executive recruitment','78102':'Employment agencies','78200':'Temporary staffing',
+      '78300':'HR services','79110':'Travel agencies','79120':'Tour operators',
+      '79901':'Tourist information','79909':'Other travel & tourism',
+      '80100':'Security & guarding','80200':'Security systems','80300':'Investigation activities',
+      '81100':'Facilities management','81210':'General cleaning','81220':'Specialist cleaning',
+      '81290':'Other cleaning','81300':'Landscaping','82110':'Office support services',
+      '82190':'Photocopying & document services','82200':'Call centres','82300':'Event organisation',
+      '82910':'Debt collection','82920':'Packaging','82990':'Other business support',
+      // Education
+      '85100':'Pre-primary education','85200':'Primary education','85310':'Secondary education',
+      '85320':'Technical & vocational education','85410':'Post-secondary education',
+      '85420':'Higher education','85510':'Sports & recreation education',
+      '85520':'Cultural education','85530':'Driving schools','85590':'Other education',
+      '85600':'Educational support',
+      // Health & social work
+      '86101':'Hospital activities','86102':'Psychiatric hospitals','86210':'GP practice',
+      '86220':'Specialist medical practice','86230':'Dental practice','86900':'Other health activities',
+      '87100':'Residential nursing care','87200':'Mental health residential care',
+      '87300':'Elderly & disability residential care','87900':'Other residential care',
+      '88100':'Social work – elderly & disabled','88910':'Childcare',
+      '88990':'Other social work',
+      // Arts, entertainment & recreation
+      '90010':'Performing arts','90020':'Performing arts support','90030':'Artistic creation',
+      '90040':'Arts venue operation','91011':'Library','91020':'Museums',
+      '91030':'Historic sites','92000':'Gambling & betting',
+      '93110':'Sports facilities','93120':'Sports clubs','93130':'Gym & fitness',
+      '93199':'Other sports activities','93210':'Amusement parks','93290':'Other amusement',
+      // Personal services
+      '95110':'Computer & mobile repair','95210':'Consumer electronics repair',
+      '95220':'Appliance repair','95230':'Footwear repair','95240':'Furniture repair',
+      '95250':'Watch & jewellery repair','95290':'Other personal goods repair',
+      '96010':'Laundry & dry-cleaning','96020':'Hair & beauty salons',
+      '96030':'Funeral services','96040':'Gyms & well-being','96090':'Other personal services',
+    };
+
+    function getSicDescription(code) {
+      if (!code) return '';
+      const clean = String(code).replace(/\s/g, '');
+      return SIC[clean] || clean;
+    }
+
     let vatValue          = null;
     let chDirectors       = [];      // active directors from CH
     let selectedDobPartial = null;  // { month, year } from CH
@@ -530,6 +658,13 @@
         if (a.postal_code) setVal('p2-trade-postcode', a.postal_code);
         if (a.locality)    setVal('p2-trade-city',     a.locality);
         if (a.region)      setVal('p2-trade-county',   a.region);
+      }
+
+      // Business type from SIC code
+      if (company?.sicCodes?.length) {
+        const desc = getSicDescription(company.sicCodes[0]);
+        const bizEl = document.getElementById('p2-biz-type');
+        if (bizEl && !bizEl.value && desc) bizEl.value = desc;
       }
 
       // Trading length from incorporation date
