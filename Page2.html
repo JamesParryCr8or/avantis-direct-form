@@ -415,6 +415,11 @@
           </div>
           <!-- /director-details -->
 
+          <div id="form-error-banner" style="display:none;background:#fff0f0;border:1.5px solid var(--error);border-radius:10px;padding:14px 18px;margin-bottom:16px;font-size:14px;color:var(--error);font-weight:600;display:none;align-items:center;gap:10px;">
+            <span style="font-size:18px">⚠️</span>
+            <span>Please fill in all required fields above before continuing.</span>
+          </div>
+
           <button type="submit" class="cta-btn" id="p2-submit-btn">
             Save &amp; Continue to Documents →
           </button>
@@ -953,10 +958,14 @@
 
       const dirOk = validateDirectorSection();
 
+      const banner = document.getElementById('form-error-banner');
       if (!baseOk || vatValue === null || !dirOk) {
-        document.querySelector('.invalid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        banner.style.display = 'flex';
+        (document.querySelector('.invalid') || document.querySelector('.field-error.show'))
+          ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
+      banner.style.display = 'none';
 
       document.getElementById('loading-overlay').classList.add('show');
 
