@@ -986,6 +986,9 @@
         'State/Province (Director\'s / Proprietor Address)':  document.getElementById('p2-dir-county').value.trim()   || undefined,
         'Country (Director\'s / Proprietor Address)':         'United Kingdom',
         'Status': "Director's Details Added",
+        'Url': recordId
+          ? `https://avantis-direct-form.vercel.app/page3?id=${encodeURIComponent(recordId)}`
+          : undefined,
       };
       Object.keys(fields).forEach(k => fields[k] === undefined && delete fields[k]);
 
@@ -1006,6 +1009,16 @@
         }
         const data = await res.json();
         const id   = recordId || data.id;
+
+        // If a new record was created (no prior recordId), set Url to page3 now we know the ID
+        if (!recordId && id) {
+          fetch('/api/airtable-update', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recordId: id, fields: { 'Url': `https://avantis-direct-form.vercel.app/page3?id=${encodeURIComponent(id)}` } })
+          }).catch(() => {});
+        }
+
         window.location.href = '/page3?id=' + encodeURIComponent(id);
       } catch (err) {
         console.error('Submit error:', err);

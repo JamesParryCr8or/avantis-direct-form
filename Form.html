@@ -1285,17 +1285,6 @@
       const company = noCompanySelected ? 'No registered company' : document.getElementById('f-company').value.trim();
       const companyNumber = selectedCompany ? selectedCompany.number : '';
 
-      // LeadConnector — fire and forget
-      fetch('https://services.leadconnectorhq.com/hooks/8qkx5Hada8mesjOqMckj/webhook-trigger/c8912358-5289-4deb-9347-17876f91adf9', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName, lastName, email, phone, company, companyNumber,
-          qualifier: qualifierValue, noCompany: noCompanySelected,
-          submittedAt: new Date().toISOString(), source: window.location.href, fbclid, ...utmData
-        }),
-        mode: 'no-cors'
-      }).catch(() => { });
-
       // Save to sessionStorage so Page2 can prefill instantly (even if Airtable fails)
       try {
         sessionStorage.setItem('avantis_form_data', JSON.stringify({
@@ -1311,11 +1300,12 @@
         'First_Name': firstName,
         'Last_Name': lastName,
         'Phone': phone,
-        'Url': window.location.href,
         'Are you currently using a card machine?': qualifierValue === 'yes-terminal' ? 'Yes' : 'No',
         'Status': 'Savings Quote Generated',
       };
       Object.entries(utmData).forEach(([k, v]) => { if (v) atFields[k] = v; });
+
+      const WEBHOOK = 'https://services.leadconnectorhq.com/hooks/8qkx5Hada8mesjOqMckj/webhook-trigger/c8912358-5289-4deb-9347-17876f91adf9';
 
       try {
         const atRes = await fetch('/api/airtable-create', {
@@ -1325,8 +1315,43 @@
         });
         const atData = await atRes.json();
         const id = atRes.ok ? atData.id : null;
+
+        const page2Url = id
+          ? `https://avantis-direct-form.vercel.app/page2?id=${encodeURIComponent(id)}`
+          : 'https://avantis-direct-form.vercel.app/page2';
+
+        // Fire webhook WITH record ID now that we have it
+        fetch(WEBHOOK, {
+          method: 'POST', mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName, lastName, email, phone, company, companyNumber,
+            qualifier: qualifierValue, noCompany: noCompanySelected,
+            recordId: id || '', nextStepUrl: page2Url,
+            submittedAt: new Date().toISOString(), source: page2Url, fbclid, ...utmData
+          })
+        }).catch(() => {});
+
+        // Update Url field to page2 URL so Airtable always links to the next step
+        if (id) {
+          fetch('/api/airtable-update', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recordId: id, fields: { 'Url': page2Url } })
+          }).catch(() => {});
+        }
+
         window.location.href = '/page2' + (id ? '?id=' + encodeURIComponent(id) : '');
       } catch {
+        fetch(WEBHOOK, {
+          method: 'POST', mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName, lastName, email, phone, company, companyNumber,
+            qualifier: qualifierValue, noCompany: noCompanySelected,
+            recordId: '', submittedAt: new Date().toISOString(), source: window.location.href, fbclid, ...utmData
+          })
+        }).catch(() => {});
         window.location.href = '/page2';
       }
     }

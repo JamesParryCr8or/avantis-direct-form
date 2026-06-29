@@ -437,7 +437,7 @@
         await fetch('/api/airtable-update', {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ recordId, fields: { 'Status': 'Documents Submitted' } })
+          body: JSON.stringify({ recordId, fields: { 'Status': 'Documents Submitted', 'Url': 'https://www.avantisdirect.com' } })
         });
       } catch (e) { console.warn('Status update error:', e); }
 
