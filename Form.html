@@ -651,24 +651,25 @@
     .no-company-btn {
       display: block;
       width: 100%;
-      margin-top: 12px;
-      padding: 14px 16px;
-      border: 2px solid var(--blue);
-      border-radius: 12px;
-      background: rgba(26, 92, 255, 0.07);
-      color: var(--blue);
-      font-size: 14px;
-      font-weight: 700;
+      margin-top: 10px;
+      padding: 10px 16px;
+      border: none;
+      background: transparent;
+      color: var(--grey);
+      font-size: 13px;
+      font-weight: 500;
       font-family: 'Inter', sans-serif;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: color 0.2s;
       text-align: center;
-      letter-spacing: -0.01em;
+      text-decoration: underline;
+      text-decoration-color: transparent;
+      text-underline-offset: 2px;
     }
 
     .no-company-btn:hover {
-      background: rgba(26, 92, 255, 0.15);
-      border-color: var(--blue-light);
+      color: var(--blue);
+      text-decoration-color: var(--blue);
     }
 
     /* Mobile scroll CTA */
@@ -950,12 +951,12 @@
               <div class="company-suggestions" id="company-suggestions"></div>
             </div>
             <div class="field-error" id="err-company">Please enter your company name</div>
-            <button class="no-company-btn" onclick="noCompany()">
-              🏪 I don't have a registered company — new business or sole trader
-            </button>
           </div>
 
           <button class="cta-btn" id="step2-btn" onclick="goToContacts()">Continue →</button>
+          <button class="no-company-btn" onclick="noCompany()">
+            I don't have a registered company — new business or sole trader
+          </button>
           <div class="trust-line"><span>🔒</span> We never share your details with third parties</div>
         </div>
 
