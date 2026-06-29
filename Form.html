@@ -14,7 +14,7 @@
     !function (f, b, e, v, n, t, s) {
       if (f.fbq) return; n = f.fbq = function () {
         n.callMethod ?
-        n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+          n.callMethod.apply(n, arguments) : n.queue.push(arguments)
       }; if (!f._fbq) f._fbq = n;
       n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0;
       t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s)
@@ -1273,30 +1273,39 @@
       if (typeof fbq !== 'undefined') fbq('track', 'Lead');
 
       const btn = document.getElementById('step3-btn');
-      btn.disabled    = true;
+      btn.disabled = true;
       btn.textContent = 'Submitting…';
 
-      const fullName  = document.getElementById('f-name').value.trim();
-      const email     = document.getElementById('f-email').value.trim();
-      const phone     = document.getElementById('f-phone').value.trim();
+      const fullName = document.getElementById('f-name').value.trim();
+      const email = document.getElementById('f-email').value.trim();
+      const phone = document.getElementById('f-phone').value.trim();
       const nameParts = fullName.split(' ');
       const firstName = nameParts[0] || '';
-      const lastName  = nameParts.slice(1).join(' ') || '';
-      const company   = noCompanySelected ? 'No registered company' : document.getElementById('f-company').value.trim();
+      const lastName = nameParts.slice(1).join(' ') || '';
+      const company = noCompanySelected ? 'No registered company' : document.getElementById('f-company').value.trim();
       const companyNumber = selectedCompany ? selectedCompany.number : '';
 
       // LeadConnector — fire and forget
       fetch('https://services.leadconnectorhq.com/hooks/8qkx5Hada8mesjOqMckj/webhook-trigger/c8912358-5289-4deb-9347-17876f91adf9', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, email, phone, company, companyNumber,
+        body: JSON.stringify({
+          firstName, lastName, email, phone, company, companyNumber,
           qualifier: qualifierValue, noCompany: noCompanySelected,
-          submittedAt: new Date().toISOString(), source: window.location.href, fbclid, ...utmData }),
+          submittedAt: new Date().toISOString(), source: window.location.href, fbclid, ...utmData
+        }),
         mode: 'no-cors'
-      }).catch(() => {});
+      }).catch(() => { });
+
+      // Save to sessionStorage so Page2 can prefill instantly (even if Airtable fails)
+      try {
+        sessionStorage.setItem('avantis_form_data', JSON.stringify({
+          companyNumber, companyName: company, email, phone,
+          firstName, lastName, directorName: fullName,
+        }));
+      } catch {}
 
       const atFields = {
         'Company Name': company,
-        'Company Number': companyNumber || undefined,
         'Email': email,
         "Director's / Proprietor Full Name": fullName,
         'First_Name': firstName,
@@ -1308,16 +1317,15 @@
         'Current step': 'Page 2',
       };
       Object.entries(utmData).forEach(([k, v]) => { if (v) atFields[k] = v; });
-      Object.keys(atFields).forEach(k => atFields[k] === undefined && delete atFields[k]);
 
       try {
-        const atRes  = await fetch('/api/airtable-create', {
+        const atRes = await fetch('/api/airtable-create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ fields: atFields })
         });
         const atData = await atRes.json();
-        const id     = atRes.ok ? atData.id : null;
+        const id = atRes.ok ? atData.id : null;
         window.location.href = '/page2' + (id ? '?id=' + encodeURIComponent(id) : '');
       } catch {
         window.location.href = '/page2';

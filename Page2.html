@@ -438,35 +438,65 @@
     // ── helpers ──
     function setVal(id, val) { const el = document.getElementById(id); if (el && val) el.value = val; }
 
-    // ── Step 1: fetch Airtable record ──
+    // ── Step 1: prefill from sessionStorage (instant) then Airtable (persistent) ──
     async function prefillFromRecord() {
+      let chTriggered = false;
+
+      // Instant prefill from sessionStorage (written by Form.html before redirect)
+      try {
+        const stored = sessionStorage.getItem('avantis_form_data');
+        if (stored) {
+          const d = JSON.parse(stored);
+          if (d.firstName) {
+            document.getElementById('name-display').textContent = d.firstName + "'s business";
+          }
+          if (d.companyName) {
+            setVal('p2-company-name',   d.companyName);
+            setVal('p2-trading-name',   d.companyName);
+          }
+          if (d.companyNumber) setVal('p2-company-number', d.companyNumber);
+          if (d.email)         setVal('p2-email', d.email);
+          if (d.phone)         setVal('p2-phone', d.phone);
+
+          if (d.companyNumber) {
+            chTriggered = true;
+            fetchCompanyDetails(d.companyNumber); // don't await — runs in background
+          }
+        }
+      } catch {}
+
+      // Also fetch from Airtable if we have a record ID (belt-and-suspenders)
       if (!recordId) {
-        initDirectorSection([]);
+        if (!chTriggered) initDirectorSection([]);
         return;
       }
       try {
         const res = await fetch(`/api/airtable-get?id=${encodeURIComponent(recordId)}`);
-        if (!res.ok) { initDirectorSection([]); return; }
+        if (!res.ok) { if (!chTriggered) initDirectorSection([]); return; }
         const { fields } = await res.json();
 
-        if (fields['First_Name']) {
+        // Fill any fields that aren't already set from sessionStorage
+        if (fields['First_Name'] && document.getElementById('name-display').textContent === 'your business') {
           document.getElementById('name-display').textContent = fields['First_Name'] + "'s business";
         }
         setVal('p2-company-name',   fields['Company Name']   || '');
         setVal('p2-trading-name',   fields['Company Name']   || '');
-        setVal('p2-company-number', fields['Company Number'] || '');
         setVal('p2-email',          fields['Email']          || '');
         setVal('p2-phone',          fields['Phone']          || '');
 
-        const num = fields['Company Number'];
-        if (num) {
-          await fetchCompanyDetails(num);
-        } else {
-          initDirectorSection([]);
+        // Only trigger CH fetch from Airtable if sessionStorage didn't already do it
+        if (!chTriggered) {
+          const num = fields['Company Number'];
+          if (num) {
+            setVal('p2-company-number', num);
+            await fetchCompanyDetails(num);
+          } else {
+            initDirectorSection([]);
+          }
         }
       } catch (e) {
         console.warn('Prefill error:', e);
-        initDirectorSection([]);
+        if (!chTriggered) initDirectorSection([]);
       }
     }
 
