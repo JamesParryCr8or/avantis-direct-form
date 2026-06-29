@@ -56,27 +56,8 @@ module.exports = async function handler(req, res) {
     const contactId = createData.contact?.id;
     console.log('GHL contact created:', contactId);
 
-    // 2. Add to onboarding workflow (awaited — Vercel kills function on res.json())
-    if (contactId) {
-      try {
-        const wfRes  = await fetch(`${GHL_URL}/contacts/${contactId}/workflow/${WORKFLOW_ID}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type':  'application/json',
-            'Accept':        'application/json',
-            'Authorization': `Bearer ${GHL_TOKEN}`,
-            'Version':       '2021-07-28',
-          },
-          body: JSON.stringify({ eventStartTime: new Date().toISOString() }),
-        });
-        const wfText = await wfRes.text();
-        console.log('GHL workflow:', wfRes.status, wfText);
-      } catch (err) {
-        console.error('GHL workflow error:', err);
-      }
-    }
-
-    // 3. Write GHL Contact ID back to Airtable (awaited)
+    // 2. Write GHL Contact ID to Airtable immediately (before workflow, so a slow
+    //    workflow call can't prevent this from completing within Vercel's timeout)
     if (contactId && recordId && AT_PAT) {
       try {
         const atRes = await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_TABLE}/${recordId}`, {
@@ -87,9 +68,34 @@ module.exports = async function handler(req, res) {
           },
           body: JSON.stringify({ fields: { 'GHL Contact ID': contactId } }),
         });
-        console.log('Airtable GHL ID saved:', atRes.status);
+        const atData = await atRes.json();
+        console.log('Airtable GHL ID saved:', atRes.status, JSON.stringify(atData).slice(0, 200));
       } catch (err) {
         console.error('Airtable GHL ID error:', err);
+      }
+    }
+
+    // 3. Add to onboarding workflow (5s timeout so it never blocks the response)
+    if (contactId) {
+      try {
+        const ctrl   = new AbortController();
+        const timer  = setTimeout(() => ctrl.abort(), 5000);
+        const wfRes  = await fetch(`${GHL_URL}/contacts/${contactId}/workflow/${WORKFLOW_ID}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'Accept':        'application/json',
+            'Authorization': `Bearer ${GHL_TOKEN}`,
+            'Version':       '2021-07-28',
+          },
+          body: JSON.stringify({ eventStartTime: new Date().toISOString() }),
+          signal: ctrl.signal,
+        });
+        clearTimeout(timer);
+        const wfText = await wfRes.text();
+        console.log('GHL workflow:', wfRes.status, wfText);
+      } catch (err) {
+        console.error('GHL workflow error:', err.name === 'AbortError' ? 'timed out' : err);
       }
     }
 
