@@ -1,5 +1,6 @@
-const AT_BASE = 'appwmu552AUleDadr';
-const AT_PAT  = process.env.AIRTABLE_PERSONAL_ACCESS_TOKEN;
+const AT_BASE  = 'appwmu552AUleDadr';
+const AT_TABLE = 'tblUlFciubEeVTFm7';
+const AT_PAT   = process.env.AIRTABLE_PERSONAL_ACCESS_TOKEN;
 
 module.exports.config = {
   api: { bodyParser: { sizeLimit: '12mb' } },
@@ -21,15 +22,11 @@ module.exports = async function handler(req, res) {
 
   try {
     const fileBuffer = Buffer.from(fileBase64, 'base64');
-    const boundary   = '----AirtableUpload' + Date.now().toString(36);
-    const CRLF       = '\r\n';
+    // Build multipart body — field ID goes in the URL path, not the body
+    const boundary  = '----AirtableUpload' + Date.now().toString(36);
+    const CRLF      = '\r\n';
 
-    const part1 =
-      `--${boundary}${CRLF}` +
-      `Content-Disposition: form-data; name="field"${CRLF}${CRLF}` +
-      `${fieldId}${CRLF}`;
-
-    const part2Header =
+    const partHeader =
       `--${boundary}${CRLF}` +
       `Content-Disposition: form-data; name="file"; filename="${filename || 'upload'}"${CRLF}` +
       `Content-Type: ${contentType || 'application/octet-stream'}${CRLF}${CRLF}`;
@@ -37,14 +34,14 @@ module.exports = async function handler(req, res) {
     const footer = `${CRLF}--${boundary}--${CRLF}`;
 
     const body = Buffer.concat([
-      Buffer.from(part1),
-      Buffer.from(part2Header),
+      Buffer.from(partHeader),
       fileBuffer,
       Buffer.from(footer),
     ]);
 
+    // Correct URL format: /v0/{base}/{table}/{recordId}/{fieldId}/uploadAttachment
     const atRes = await fetch(
-      `https://content.airtable.com/v0/${AT_BASE}/${recordId}/uploadAttachment`,
+      `https://content.airtable.com/v0/${AT_BASE}/${AT_TABLE}/${recordId}/${encodeURIComponent(fieldId)}/uploadAttachment`,
       {
         method: 'POST',
         headers: {
@@ -60,6 +57,9 @@ module.exports = async function handler(req, res) {
     let data;
     try { data = JSON.parse(text); } catch { data = { raw: text }; }
 
+    if (!atRes.ok) {
+      console.error(`Upload failed ${atRes.status} for field ${fieldId}:`, text);
+    }
     return res.status(atRes.status).json(data);
   } catch (err) {
     console.error('Upload error:', err);

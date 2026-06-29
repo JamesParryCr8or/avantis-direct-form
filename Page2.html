@@ -804,6 +804,7 @@
         }).join('');
 
         dropdown.onclick = async (e) => {
+          e.stopPropagation(); // prevent document handler closing dropdown on innerHTML replace
           const opt = e.target.closest('[data-idx]');
           if (!opt) return;
           const item = items[parseInt(opt.dataset.idx, 10)];
