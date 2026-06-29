@@ -222,6 +222,7 @@
         <form id="p2-form" novalidate>
 
           <!-- ── COMPANY INFORMATION ── -->
+          <div class="section" id="section-company-info">
           <div class="section-title">Company Information</div>
 
           <div class="field-row">
@@ -293,8 +294,10 @@
             <input type="tel" id="p2-phone" placeholder="07700 900000" required>
             <div class="field-error" id="err-phone">Valid UK number required</div>
           </div>
+          </div><!-- /section-company-info -->
 
           <!-- ── TRADING ADDRESS ── -->
+          <div class="section" id="section-trading-address">
           <div class="section-title">Trading Address</div>
 
           <div class="field">
@@ -332,6 +335,7 @@
             <label>County / Region</label>
             <input type="text" id="p2-trade-county" placeholder="Greater London">
           </div>
+          </div><!-- /section-trading-address -->
 
           <!-- ── DIRECTOR / PROPRIETOR ── -->
           <div class="section-title">Director / Proprietor Details</div>
@@ -940,7 +944,8 @@
     document.getElementById('p2-form').addEventListener('submit', async function (e) {
       e.preventDefault();
 
-      const baseOk = [
+      const isSoleTrader = sessionStorage.getItem('avantis_sole_trader') === '1';
+      const baseOk = (isSoleTrader ? [] : [
         req('p2-company-name',   'err-company-name'),
         req('p2-trading-name',   'err-trading-name'),
         req('p2-biz-type',       'err-biz-type'),
@@ -948,18 +953,19 @@
         req('p2-trade-addr1',    'err-trade-addr1'),
         req('p2-trade-postcode', 'err-trade-postcode'),
         req('p2-trade-city',     'err-trade-city'),
+      ]).concat([
         validateEmail(),
         validatePhone(),
-      ].every(Boolean);
+      ]).every(Boolean);
 
-      if (vatValue === null) {
+      if (!isSoleTrader && vatValue === null) {
         document.getElementById('err-vat').classList.add('show');
       }
 
       const dirOk = validateDirectorSection();
 
       const banner = document.getElementById('form-error-banner');
-      if (!baseOk || vatValue === null || !dirOk) {
+      if (!baseOk || (!isSoleTrader && vatValue === null) || !dirOk) {
         banner.style.display = 'flex';
         (document.querySelector('.invalid') || document.querySelector('.field-error.show'))
           ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1035,6 +1041,27 @@
         alert('Something went wrong. Please try again.');
       }
     });
+
+    // ── Sole trader mode: hide company/address sections, show only director ──
+    (function applySoleTraderMode() {
+      try {
+        if (sessionStorage.getItem('avantis_sole_trader') !== '1') return;
+        // Hide company info and trading address sections
+        const hideIds = [
+          'section-company-info',
+          'section-trading-address',
+        ];
+        hideIds.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = 'none';
+        });
+        // Update left panel
+        const disp = document.getElementById('name-display');
+        if (disp) disp.textContent = 'your business';
+        const sub = document.querySelector('.left-sub');
+        if (sub) sub.textContent = 'Just a few personal details to get you set up.';
+      } catch {}
+    })();
 
     // Kick off prefill
     prefillFromRecord();

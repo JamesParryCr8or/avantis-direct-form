@@ -222,7 +222,7 @@
           </div>
 
           <!-- UTILITY BILL -->
-          <div class="upload-card" id="card-utility">
+          <div class="upload-card" id="card-utility" style="display:none">
             <div class="upload-label">🏠 Director's Utility Bill <span class="req">*</span></div>
             <div class="upload-hint">Must show your address and be dated within the last 3 months.</div>
             <div class="file-drop" id="drop-utility">
@@ -243,7 +243,7 @@
           </div>
 
           <!-- BANK STATEMENT -->
-          <div class="upload-card" id="card-bank">
+          <div class="upload-card" id="card-bank" style="display:none">
             <div class="upload-label">🏦 Business Bank Statement <span class="req">*</span></div>
             <div class="upload-hint">Must be dated within the last 3 months.</div>
             <div class="file-drop" id="drop-bank">
@@ -264,7 +264,7 @@
           </div>
 
           <!-- BUSINESS UTILITY BILL -->
-          <div class="upload-card" id="card-bizutil">
+          <div class="upload-card" id="card-bizutil" style="display:none">
             <div class="upload-label">📋 Business Utility Bill or Purchase Invoice <span class="req">*</span></div>
             <div class="upload-hint">Any business utility bill or purchase invoice dated within the last 3 months.</div>
             <div class="file-drop" id="drop-bizutil">
@@ -405,7 +405,7 @@
     async function submitDocuments() {
       // Validate all required files are selected
       let valid = true;
-      ['passport', 'utility', 'bank', 'bizutil'].forEach(key => {
+      ['passport'].forEach(key => {
         if (!files[key]) {
           document.getElementById('card-' + key).classList.add('has-error');
           document.getElementById('err-' + key).classList.add('show');
@@ -423,7 +423,7 @@
       btn.disabled = true;
       btn.textContent = 'Uploading documents…';
 
-      const keys = ['passport', 'utility', 'bank', 'bizutil'];
+      const keys = ['passport'];
       let allOk = true;
 
       for (const key of keys) {

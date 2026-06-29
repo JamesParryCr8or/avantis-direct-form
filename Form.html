@@ -647,27 +647,49 @@
       text-align: center;
     }
 
-    /* "no company" dashed button */
+    /* "no company" button */
     .no-company-btn {
       display: block;
       width: 100%;
-      margin-top: 10px;
-      padding: 11px 16px;
-      border: 1.5px dashed var(--grey-light);
-      border-radius: 10px;
-      background: transparent;
-      color: var(--grey);
-      font-size: 13px;
+      margin-top: 12px;
+      padding: 14px 16px;
+      border: 2px solid var(--blue);
+      border-radius: 12px;
+      background: rgba(26, 92, 255, 0.07);
+      color: var(--blue);
+      font-size: 14px;
+      font-weight: 700;
       font-family: 'Inter', sans-serif;
       cursor: pointer;
       transition: all 0.2s;
       text-align: center;
+      letter-spacing: -0.01em;
     }
 
     .no-company-btn:hover {
-      border-color: var(--blue);
-      color: var(--blue);
-      background: rgba(26, 92, 255, 0.04);
+      background: rgba(26, 92, 255, 0.15);
+      border-color: var(--blue-light);
+    }
+
+    /* Mobile scroll CTA */
+    .mobile-scroll-cta {
+      display: none;
+      margin-top: 20px;
+      width: 100%;
+      padding: 15px 20px;
+      background: linear-gradient(135deg, #00e676 0%, #00c853 100%);
+      color: #0a1628;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      letter-spacing: -0.01em;
+      text-align: center;
+    }
+    @media (max-width: 900px) {
+      .mobile-scroll-cta { display: block; }
     }
 
     /* CTA button */
@@ -852,10 +874,14 @@
         </div>
       </div>
 
+      <button class="mobile-scroll-cta" onclick="document.getElementById('form-panel').scrollIntoView({behavior:'smooth'})">
+        Get Your Card Machine Today →
+      </button>
+
     </div>
 
     <!-- ═══════════ RIGHT ═══════════ -->
-    <div class="right">
+    <div class="right" id="form-panel">
       <div class="form-card">
 
         <!-- progress bar -->
@@ -970,7 +996,7 @@
           <button class="cta-btn" id="step3-btn" onclick="submitForm()">
             Get My Free Quote 🎉
           </button>
-          <div class="trust-line"><span>✅</span> Free quote, no obligation, no hard sell</div>
+          <div class="trust-line"><span>✅</span> We'll deliver your card machine direct to your door</div>
         </div>
 
 
@@ -1032,6 +1058,7 @@
     }
 
     function goBack(toStep) {
+      saveFormDraft();
       showStep(toStep);
       updateProgress(toStep);
       const titles = {
@@ -1048,6 +1075,7 @@
     function noCompany() {
       noCompanySelected = true;
       selectedCompany = null;
+      try { sessionStorage.setItem('avantis_sole_trader', '1'); } catch {}
       document.getElementById('f-company').value = '';
       document.getElementById('company-suggestions').classList.remove('open');
       setFieldState('f-company', 'icon-company', 'err-company', null, '');
@@ -1293,6 +1321,8 @@
         }));
       } catch {}
 
+      try { localStorage.removeItem('avantis_draft'); } catch {}
+
       const atFields = {
         'Company Name': company,
         'Email': email,
@@ -1300,7 +1330,7 @@
         'First_Name': firstName,
         'Last_Name': lastName,
         'Phone': phone,
-        'Are you currently using a card machine?': qualifierValue === 'yes-terminal' ? 'Yes' : 'No',
+        'Are you currently using a card machine?': qualifierValue === 'yes-terminal' ? 'Yes' : qualifierValue === 'exploring' ? 'Just Exploring' : 'No',
         'Status': 'Savings Quote Generated',
       };
       Object.entries(utmData).forEach(([k, v]) => { if (v) atFields[k] = v; });
@@ -1355,6 +1385,41 @@
         window.location.href = '/page2';
       }
     }
+    // ── Draft persistence ──
+    function saveFormDraft() {
+      try {
+        localStorage.setItem('avantis_draft', JSON.stringify({
+          name:    document.getElementById('f-name').value,
+          email:   document.getElementById('f-email').value,
+          phone:   document.getElementById('f-phone').value,
+          company: document.getElementById('f-company').value,
+          selectedCompany,
+          noCompanySelected,
+        }));
+      } catch {}
+    }
+
+    function restoreFormDraft() {
+      try {
+        const raw = localStorage.getItem('avantis_draft');
+        if (!raw) return;
+        const d = JSON.parse(raw);
+        if (d.name)  { document.getElementById('f-name').value  = d.name;  validateName();  }
+        if (d.email) { document.getElementById('f-email').value = d.email; validateEmail(); }
+        if (d.phone) { document.getElementById('f-phone').value = d.phone; validatePhone(); }
+        if (d.company) document.getElementById('f-company').value = d.company;
+        if (d.selectedCompany) {
+          selectedCompany = d.selectedCompany;
+          setFieldState('f-company', 'icon-company', 'err-company', true, '');
+        }
+        if (d.noCompanySelected) {
+          noCompanySelected = true;
+          try { sessionStorage.setItem('avantis_sole_trader', '1'); } catch {}
+        }
+      } catch {}
+    }
+
+    restoreFormDraft();
   </script>
 </body>
 
