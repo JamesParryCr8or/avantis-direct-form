@@ -1305,7 +1305,7 @@
       };
       Object.entries(utmData).forEach(([k, v]) => { if (v) atFields[k] = v; });
 
-      const WEBHOOK = 'https://services.leadconnectorhq.com/hooks/8qkx5Hada8mesjOqMckj/webhook-trigger/c8912358-5289-4deb-9347-17876f91adf9';
+      const WEBHOOK = '/api/send-webhook';
 
       try {
         const atRes = await fetch('/api/airtable-create', {
@@ -1322,7 +1322,7 @@
 
         // Fire webhook WITH record ID now that we have it
         fetch(WEBHOOK, {
-          method: 'POST', mode: 'no-cors',
+          method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             firstName, lastName, email, phone, company, companyNumber,
@@ -1344,7 +1344,7 @@
         window.location.href = '/page2' + (id ? '?id=' + encodeURIComponent(id) : '');
       } catch {
         fetch(WEBHOOK, {
-          method: 'POST', mode: 'no-cors',
+          method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             firstName, lastName, email, phone, company, companyNumber,
