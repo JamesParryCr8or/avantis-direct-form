@@ -30,6 +30,13 @@ module.exports = async function handler(req, res) {
         dob:       o.date_of_birth
                      ? { month: o.date_of_birth.month, year: o.date_of_birth.year }
                      : null,
+        address:   o.address ? {
+          line1:    [o.address.premises, o.address.address_line_1].filter(Boolean).join(', '),
+          city:     o.address.locality    || '',
+          county:   o.address.region      || '',
+          postcode: o.address.postal_code || '',
+          country:  o.address.country     || '',
+        } : null,
       }));
 
     return res.status(200).json({

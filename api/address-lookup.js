@@ -1,57 +1,76 @@
+// Royal Mail AddressNow (Loqate) – two-step: find → retrieve
+const FIND     = 'https://api.addressnow.co.uk/capture/interactive/find/v1.1/json3.ws';
+const RETRIEVE = 'https://api.addressnow.co.uk/capture/interactive/retrieve/v1.2/json3.ws';
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
   if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'GET')    return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'GET')    return res.status(405).end();
 
-  const ROYAL_MAIL_API_KEY = process.env.ROYAL_MAIL_API_KEY;
-  // Accept ?q= (typeahead) or legacy ?postcode=
-  const query = ((req.query.q || req.query.postcode) || '').trim();
-  if (!query) return res.status(400).json({ error: 'Query required' });
+  const KEY = process.env.ROYAL_MAIL_API_KEY;
+  const { q, id, container } = req.query;
 
-  try {
-    // Royal Mail Address Management (PAF) API
-    // Swap the URL/headers below if using a reseller (Loqate, getAddress.io, etc.)
-    const url = `https://api.royalmail.net/v2/address/addresses?query=${encodeURIComponent(query)}`;
-    const rmRes = await fetch(url, {
-      headers: { Authorization: ROYAL_MAIL_API_KEY, Accept: 'application/json' },
-    });
+  // ── Retrieve: get full address by Loqate ID ──
+  if (id) {
+    try {
+      const url = `${RETRIEVE}?Key=${encodeURIComponent(KEY)}&Id=${encodeURIComponent(id)}`;
+      const r    = await fetch(url);
+      const data = await r.json();
+      const item = data.Items?.[0];
+      if (!item || item.Error) return res.status(404).json({ error: 'Not found' });
 
-    if (!rmRes.ok) return fallback(query, res);
+      const line1 = [item.BuildingNumber, item.BuildingName, item.PrimaryStreet || item.Street]
+        .filter(Boolean).join(' ').trim() || item.Line1 || '';
 
-    const data = await rmRes.json();
-    const addresses = (data.addresses || data.results || []).map(a => ({
-      line1:    [a.buildingNumber, a.buildingName, a.thoroughfareName].filter(Boolean).join(' '),
-      city:     a.postTown  || a.town || '',
-      county:   a.county    || a.dependentLocality || '',
-      postcode: a.postcode  || query,
-    }));
-    return res.status(200).json({ addresses });
-  } catch {
-    return fallback(query, res);
-  }
-};
-
-async function fallback(query, res) {
-  // postcodes.io only helps for postcode-style queries
-  const clean = query.replace(/\s/g, '');
-  const isPostcode = /^[A-Z]{1,2}\d[A-Z\d]?\d[A-Z]{2}$/i.test(clean);
-  if (!isPostcode) return res.status(200).json({ addresses: [], fallback: true });
-
-  try {
-    const r    = await fetch(`https://api.postcodes.io/postcodes/${encodeURIComponent(clean)}`);
-    const data = await r.json();
-    if (data.status === 200) {
       return res.status(200).json({
-        addresses: [{
-          line1:    '',
-          city:     data.result.admin_district || data.result.parliamentary_constituency || '',
-          county:   data.result.admin_county   || data.result.region || '',
-          postcode: data.result.postcode,
-        }],
-        fallback: true,
+        address: {
+          line1,
+          line2:    item.SecondaryStreet || item.Line2 || '',
+          city:     item.City || item.PostTown || '',
+          county:   item.Province || item.AdminAreaName || '',
+          postcode: item.PostalCode || '',
+        },
       });
+    } catch (err) {
+      console.error('Loqate retrieve error:', err);
+      return res.status(500).json({ error: err.message });
     }
-  } catch {}
-  return res.status(200).json({ addresses: [], fallback: true });
-}
+  }
+
+  // ── Find: search for addresses (with optional container drill-down) ──
+  if (q) {
+    try {
+      const params = new URLSearchParams({
+        Key:          KEY,
+        Text:         q,
+        IsMiddleware: 'false',
+        Countries:    'GBR',
+        Limit:        '10',
+      });
+      if (container) params.set('Container', container);
+
+      const r    = await fetch(`${FIND}?${params}`);
+      const data = await r.json();
+
+      if (!r.ok || data.Items?.[0]?.Error) {
+        console.error('Loqate find error:', JSON.stringify(data.Items?.[0]));
+        return res.status(200).json({ items: [] });
+      }
+
+      return res.status(200).json({
+        items: (data.Items || []).map(i => ({
+          id:          i.Id,
+          text:        i.Text,
+          description: i.Description,
+          type:        i.Type, // 'Address' | 'Postcode' | 'Street' | 'BuildingNumber' etc.
+        })),
+      });
+    } catch (err) {
+      console.error('Loqate find error:', err);
+      return res.status(200).json({ items: [] });
+    }
+  }
+
+  return res.status(400).json({ error: 'Provide ?q= or ?id=' });
+};

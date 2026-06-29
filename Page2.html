@@ -123,6 +123,7 @@
     .addr-option:hover { background: #f0f5ff; }
     .addr-option.addr-hint { color: var(--grey); cursor: default; font-style: italic; }
     .addr-option.addr-hint:hover { background: none; }
+    .addr-desc { display: block; color: var(--grey); font-size: 11px; margin-top: 2px; }
 
     /* Radio / VAT */
     .radio-group { display: flex; gap: 10px; }
@@ -735,6 +736,17 @@
       document.getElementById('p2-director-name').value    = director.name;
       document.getElementById('p2-director-name').readOnly = true;
 
+      // Prefill home address from Companies House registered address
+      if (director.address?.line1) {
+        const a = director.address;
+        const el1 = document.getElementById('p2-dir-addr1');    if (el1) el1.value = a.line1;
+        const elP = document.getElementById('p2-dir-postcode'); if (elP) elP.value = a.postcode;
+        const elC = document.getElementById('p2-dir-city');     if (elC) elC.value = a.city;
+        const elR = document.getElementById('p2-dir-county');   if (elR) elR.value = a.county;
+        const elS = document.getElementById('p2-dir-search');
+        if (elS) elS.value = [a.line1, a.postcode].filter(Boolean).join(', ');
+      }
+
       if (director.dob) {
         selectedDobPartial = director.dob;
         document.getElementById('p2-dob-monthyear').value          = `${MONTHS[director.dob.month - 1]} ${director.dob.year}`;
@@ -757,61 +769,75 @@
       document.getElementById('err-vat').classList.remove('show');
     }
 
-    // ── Address typeahead ──
+    // ── Address typeahead (Royal Mail AddressNow / Loqate two-step) ──
     const addrTimers = {};
 
     function addrTypeahead(input, dropdownId, addr1Id, postcodeId, cityId, countyId) {
       const q        = input.value.trim();
       const dropdown = document.getElementById(dropdownId);
       clearTimeout(addrTimers[dropdownId]);
-
       if (q.length < 3) { dropdown.classList.remove('open'); return; }
+      addrTimers[dropdownId] = setTimeout(() => {
+        loqateFind(q, null, input, dropdown, addr1Id, postcodeId, cityId, countyId);
+      }, 350);
+    }
 
-      addrTimers[dropdownId] = setTimeout(async () => {
-        dropdown.innerHTML = '<div class="addr-option addr-hint">Searching…</div>';
-        dropdown.classList.add('open');
+    async function loqateFind(q, container, input, dropdown, addr1Id, postcodeId, cityId, countyId) {
+      dropdown.innerHTML = '<div class="addr-option addr-hint">Searching…</div>';
+      dropdown.classList.add('open');
+      try {
+        const params = new URLSearchParams({ q });
+        if (container) params.set('container', container);
+        const res   = await fetch(`/api/address-lookup?${params}`);
+        const data  = await res.json();
+        const items = data.items || [];
 
-        try {
-          const res  = await fetch(`/api/address-lookup?q=${encodeURIComponent(q)}`);
-          const data = await res.json();
-          const list = data.addresses || [];
+        if (!items.length) {
+          dropdown.innerHTML = '<div class="addr-option addr-hint">No addresses found — enter details below</div>';
+          return;
+        }
 
-          if (!list.length) {
-            dropdown.innerHTML = '<div class="addr-option addr-hint">No addresses found — enter details below</div>';
-            return;
-          }
+        dropdown.innerHTML = items.map((item, i) => {
+          const arrow = item.type === 'Address' ? '' : ' ›';
+          const desc  = item.description ? `<span class="addr-desc">${item.description}</span>` : '';
+          return `<div class="addr-option" data-idx="${i}">${item.text}${arrow}${desc}</div>`;
+        }).join('');
 
-          if (data.fallback) {
-            // postcodes.io fallback: just fill city/county silently
-            const a = list[0];
-            if (a.city)   { const el = document.getElementById(cityId);   if (el && !el.value) el.value = a.city; }
-            if (a.county) { const el = document.getElementById(countyId); if (el && !el.value) el.value = a.county; }
-            if (a.postcode) { const el = document.getElementById(postcodeId); if (el && !el.value) el.value = a.postcode; }
-            dropdown.classList.remove('open');
-            return;
-          }
+        dropdown.onclick = async (e) => {
+          const opt = e.target.closest('[data-idx]');
+          if (!opt) return;
+          const item = items[parseInt(opt.dataset.idx, 10)];
 
-          dropdown.innerHTML = list.map((a, i) => {
-            const label = [a.line1, a.postcode, a.city].filter(Boolean).join(', ');
-            return `<div class="addr-option" data-idx="${i}">${label}</div>`;
-          }).join('');
-
-          dropdown.onclick = (e) => {
-            const opt = e.target.closest('[data-idx]');
-            if (!opt) return;
-            const a = list[parseInt(opt.dataset.idx, 10)];
-            if (a.line1)    setVal(addr1Id,    a.line1);
-            if (a.postcode) setVal(postcodeId, a.postcode);
-            if (a.city)     setVal(cityId,     a.city);
-            if (a.county)   setVal(countyId,   a.county);
-            input.value = [a.line1, a.postcode].filter(Boolean).join(', ');
+          if (item.type === 'Address') {
+            // Retrieve full address from Loqate
+            dropdown.innerHTML = '<div class="addr-option addr-hint">Loading…</div>';
+            try {
+              const r = await fetch(`/api/address-lookup?id=${encodeURIComponent(item.id)}`);
+              const d = await r.json();
+              const a = d.address;
+              if (a) {
+                const el1 = document.getElementById(addr1Id);
+                const elP = document.getElementById(postcodeId);
+                const elC = document.getElementById(cityId);
+                const elR = document.getElementById(countyId);
+                if (el1 && a.line1)    el1.value = a.line1;
+                if (elP && a.postcode) elP.value = a.postcode;
+                if (elC && a.city)     elC.value = a.city;
+                if (elR && a.county)   elR.value = a.county;
+                input.value = [a.line1, a.postcode].filter(Boolean).join(', ');
+              }
+            } catch {}
             dropdown.classList.remove('open');
             dropdown.onclick = null;
-          };
-        } catch {
-          dropdown.classList.remove('open');
-        }
-      }, 350);
+          } else {
+            // Container (street/postcode) — drill down
+            input.value = item.text;
+            loqateFind(item.text, item.id, input, dropdown, addr1Id, postcodeId, cityId, countyId);
+          }
+        };
+      } catch {
+        dropdown.classList.remove('open');
+      }
     }
 
     // Close dropdowns on outside click
