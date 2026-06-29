@@ -957,7 +957,6 @@
         req('p2-trade-addr1',    'err-trade-addr1'),
         req('p2-trade-postcode', 'err-trade-postcode'),
         req('p2-trade-city',     'err-trade-city'),
-      ]).concat([
         validateEmail(),
         validatePhone(),
       ]).every(Boolean);
