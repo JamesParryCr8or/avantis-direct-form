@@ -615,7 +615,10 @@
         const { fields } = await res.json();
 
         // Capture GHL Contact ID for use at submit time
-        if (fields['GHL Contact ID']) ghlContactId = fields['GHL Contact ID'];
+        if (fields['GHL Contact ID']) {
+          ghlContactId = fields['GHL Contact ID'];
+          try { sessionStorage.setItem('avantis_ghl_contact_id', ghlContactId); } catch {}
+        }
 
         // Fill any fields that aren't already set from sessionStorage
         if (fields['First_Name'] && document.getElementById('name-display').textContent === 'your business') {
@@ -1048,6 +1051,7 @@
 
         // Update GHL contact with business details (fire-and-forget)
         if (ghlContactId) {
+          const p3Id = id || recordId;
           fetch('/api/ghl-update-contact', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1065,6 +1069,9 @@
               postalCode:    fields['Zip/Postal code (Trading address)'],
               typeOfBusiness: fields['Type of business'],
               tradingLength:  fields['How long have you been trading for?'],
+              siteAbandonUrl: p3Id
+                ? `https://avantis-direct-form.vercel.app/page3?id=${encodeURIComponent(p3Id)}`
+                : undefined,
             })
           }).catch(() => {});
         }

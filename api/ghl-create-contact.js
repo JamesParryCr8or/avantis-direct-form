@@ -43,6 +43,7 @@ module.exports = async function handler(req, res) {
           recordId    ? { id: 'S1KufkT83xxvvbPh4RAk', fieldValue: recordId }    : null,
           reviewUrl   ? { id: '7Fk4WaOYtd3AjtNSgTPv', fieldValue: reviewUrl }   : null,
           cardMachine ? { id: 'Z0JFokKIXS7lsKddH7bo', fieldValue: cardMachine } : null,
+          recordId    ? { id: 'W1k4GnSnLg7ncX8a5UWz', fieldValue: `https://avantis-direct-form.vercel.app/page2?id=${recordId}` } : null,
         ].filter(Boolean),
       }),
     });

@@ -456,6 +456,21 @@
         });
       } catch (e) { console.warn('Status update error:', e); }
 
+      // Update GHL Site Abandon URL to completion page (fire-and-forget)
+      try {
+        const ghlId = sessionStorage.getItem('avantis_ghl_contact_id');
+        if (ghlId) {
+          fetch('/api/ghl-update-contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contactId:     ghlId,
+              siteAbandonUrl: 'https://www.avantisdirect.com',
+            }),
+          }).catch(() => {});
+        }
+      } catch {}
+
       if (allOk) {
         document.getElementById('upload-form').style.display = 'none';
         document.getElementById('success-screen').classList.add('show');

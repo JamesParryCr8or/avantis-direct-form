@@ -15,6 +15,7 @@ module.exports = async function handler(req, res) {
     companyName, website,
     address1, city, state, postalCode,
     typeOfBusiness, tradingLength,
+    siteAbandonUrl,
   } = req.body || {};
 
   if (!contactId) return res.status(400).json({ error: 'Missing contactId' });
@@ -23,6 +24,7 @@ module.exports = async function handler(req, res) {
     website        ? { id: 'AAPOEyQ1AZbFSlzkAoNz', fieldValue: website }        : null,
     typeOfBusiness ? { id: 'IoLGSormx5QppxBjejP8', fieldValue: typeOfBusiness } : null,
     tradingLength  ? { id: 'ARZfDgj4mYZgJ8dI5ZE7', fieldValue: tradingLength }  : null,
+    siteAbandonUrl ? { id: 'W1k4GnSnLg7ncX8a5UWz', fieldValue: siteAbandonUrl } : null,
   ].filter(Boolean);
 
   try {
