@@ -2,6 +2,7 @@
   "rewrites": [
     { "source": "/",      "destination": "/Form.html"  },
     { "source": "/page2", "destination": "/Page2.html" },
-    { "source": "/page3", "destination": "/Page3.html" }
+    { "source": "/page3",  "destination": "/Page3.html"  },
+    { "source": "/review", "destination": "/Review.html" }
   ]
 }

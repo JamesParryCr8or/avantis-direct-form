@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Review — Avantis Direct</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:      #1A5CFF;
+      --blue-dark: #0a1628;
+      --green:     #00c853;
+      --amber:     #f59e0b;
+      --red:       #ef4444;
+      --grey-bg:   #f4f6fa;
+      --grey-card: #ffffff;
+      --grey-border:#e2e8f0;
+      --grey-label:#64748b;
+      --text:      #0a1628;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--grey-bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: var(--blue-dark);
+      color: #fff;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .header-logo { height: 32px; opacity: 0.9; }
+    .header-divider { width: 1px; height: 28px; background: rgba(255,255,255,0.2); }
+    .header-title { font-size: 15px; font-weight: 600; opacity: 0.8; letter-spacing: 0.02em; }
+
+    /* ── Hero card ── */
+    .hero {
+      background: var(--blue-dark);
+      padding: 0 32px 28px;
+      border-bottom: 3px solid var(--blue);
+    }
+    .hero-company { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.03em; }
+    .hero-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+    .hero-trading { font-size: 14px; color: rgba(255,255,255,0.6); }
+    .hero-dot { width: 4px; height: 4px; border-radius: 50%; background: rgba(255,255,255,0.3); }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .status-badge.green  { background: rgba(0,200,83,0.15);  color: #00e676; }
+    .status-badge.blue   { background: rgba(26,92,255,0.25); color: #7eb3ff; }
+    .status-badge.amber  { background: rgba(245,158,11,0.2); color: #fbbf24; }
+    .status-badge.grey   { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); }
+    .hero-dates { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 6px; }
+
+    /* ── Layout ── */
+    .page { max-width: 960px; margin: 0 auto; padding: 28px 24px 60px; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .hero, .header { padding-left: 20px; padding-right: 20px; }
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--grey-card);
+      border-radius: 14px;
+      border: 1px solid var(--grey-border);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .card-header {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--grey-border);
+      background: #f8fafc;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-icon { font-size: 16px; }
+    .card-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--grey-label); }
+    .card-body { padding: 20px; }
+
+    /* ── Fields ── */
+    .field-row { display: flex; flex-direction: column; gap: 2px; }
+    .field-label { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--grey-label); }
+    .field-value { font-size: 15px; font-weight: 500; color: var(--text); word-break: break-word; }
+    .field-value a { color: var(--blue); text-decoration: none; }
+    .field-value a:hover { text-decoration: underline; }
+    .field-value.empty { color: #cbd5e1; font-style: italic; font-size: 13px; }
+    .field-value.large { font-size: 20px; font-weight: 700; }
+    .field-value.highlight { color: var(--green); }
+
+    .field-sep { height: 1px; background: var(--grey-border); margin: 14px 0; }
+
+    /* Yes/No badges */
+    .pill {
+      display: inline-flex; align-items: center;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: 700;
+    }
+    .pill.yes { background: #dcfce7; color: #16a34a; }
+    .pill.no  { background: #fee2e2; color: #dc2626; }
+    .pill.neutral { background: #e0e7ff; color: #4f46e5; }
+
+    /* ── Document cards ── */
+    .doc-list { display: flex; flex-direction: column; gap: 10px; }
+    .doc-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px;
+      background: #f8fafc;
+      border: 1px solid var(--grey-border);
+      border-radius: 10px;
+      text-decoration: none;
+      color: var(--text);
+      transition: background 0.15s;
+    }
+    .doc-item:hover { background: #e0e7ff; border-color: var(--blue); }
+    .doc-icon { font-size: 24px; flex-shrink: 0; }
+    .doc-info { flex: 1; min-width: 0; }
+    .doc-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .doc-type { font-size: 11px; color: var(--grey-label); margin-top: 1px; }
+    .doc-download { font-size: 11px; font-weight: 700; color: var(--blue); flex-shrink: 0; }
+    .doc-empty { color: var(--grey-label); font-size: 13px; font-style: italic; }
+
+    /* ── Loading / Error ── */
+    .state-screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 300px; gap: 12px; color: var(--grey-label);
+    }
+    .spinner {
+      width: 36px; height: 36px; border: 3px solid var(--grey-border);
+      border-top-color: var(--blue); border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .state-msg { font-size: 14px; font-weight: 500; }
+
+    /* ── Actions bar ── */
+    .actions {
+      display: flex; gap: 10px; flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 9px 18px; border-radius: 8px; border: none;
+      font-size: 13px; font-weight: 700; font-family: 'Inter', sans-serif;
+      cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-primary { background: var(--blue); color: #fff; }
+    .btn-outline { background: #fff; color: var(--blue); border: 1.5px solid var(--blue); }
+    .btn-ghost   { background: #fff; color: var(--grey-label); border: 1.5px solid var(--grey-border); }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <img src="https://avantis-direct-form.vercel.app/Avantis_Logo_White.svg" class="header-logo" alt="Avantis Direct" onerror="this.style.display='none'">
+  <div class="header-divider"></div>
+  <div class="header-title">Contact Review</div>
+</div>
+
+<div id="hero-section" style="display:none">
+  <div class="hero">
+    <div class="hero-company" id="h-company"></div>
+    <div class="hero-meta">
+      <div class="hero-trading" id="h-trading"></div>
+      <div class="hero-dot" id="h-dot" style="display:none"></div>
+      <div id="h-status"></div>
+    </div>
+    <div class="hero-dates" id="h-dates"></div>
+  </div>
+</div>
+
+<div class="page">
+
+  <div id="loading-state" class="state-screen">
+    <div class="spinner"></div>
+    <div class="state-msg">Loading record…</div>
+  </div>
+
+  <div id="error-state" class="state-screen" style="display:none">
+    <div style="font-size:32px">⚠️</div>
+    <div class="state-msg" id="error-msg">Record not found</div>
+  </div>
+
+  <div id="content" style="display:none">
+
+    <!-- Actions -->
+    <div class="actions">
+      <a id="act-email"   class="btn btn-primary" href="#">✉ Email</a>
+      <a id="act-phone"   class="btn btn-outline"  href="#">📞 Call</a>
+      <a id="act-ch"      class="btn btn-ghost"    href="#" target="_blank" style="display:none">🏢 Companies House</a>
+      <button class="btn btn-ghost" onclick="window.print()">🖨 Print</button>
+    </div>
+
+    <!-- Row 1: Contact + Business -->
+    <div class="grid-2">
+
+      <!-- Contact Details -->
+      <div class="card">
+        <div class="card-header"><span class="card-icon">👤</span><span class="card-title">Contact Details</span></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:14px">
+          <div class="field-row">
+            <div class="field-label">Full Name</div>
+            <div class="field-value large" id="f-name"></div>
+          </div>
+          <div class="field-sep"></div>
+          <div class="field-row">
+            <div class="field-label">Email</div>
+            <div class="field-value" id="f-email"></div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Phone</div>
+            <div class="field-value" id="f-phone"></div>
+          </div>
+          <div class="field-row" id="row-website" style="display:none">
+            <div class="field-label">Website</div>
+            <div class="field-value" id="f-website"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Business Info -->
+      <div class="card">
+        <div class="card-header"><span class="card-icon">🏪</span><span class="card-title">Business Info</span></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:14px">
+          <div class="grid-2" style="gap:12px">
+            <div class="field-row">
+              <div class="field-label">Monthly Volume</div>
+              <div class="field-value large highlight" id="f-volume"></div>
+            </div>
+            <div class="field-row">
+              <div class="field-label">Potential Savings</div>
+              <div class="field-value large highlight" id="f-savings"></div>
+            </div>
+          </div>
+          <div class="field-sep"></div>
+          <div class="field-row">
+            <div class="field-label">Type of Business</div>
+            <div class="field-value" id="f-biztype"></div>
+          </div>
+          <div class="grid-2" style="gap:12px">
+            <div class="field-row">
+              <div class="field-label">Trading Length</div>
+              <div class="field-value" id="f-trading-length"></div>
+            </div>
+            <div class="field-row">
+              <div class="field-label">Card Machine</div>
+              <div class="field-value" id="f-card-machine"></div>
+            </div>
+          </div>
+          <div class="grid-2" style="gap:12px">
+            <div class="field-row">
+              <div class="field-label">VAT Registered</div>
+              <div class="field-value" id="f-vat"></div>
+            </div>
+            <div class="field-row" id="row-vat-num" style="display:none">
+              <div class="field-label">VAT Number</div>
+              <div class="field-value" id="f-vat-num"></div>
+            </div>
+          </div>
+          <div class="field-row" id="row-company-num" style="display:none">
+            <div class="field-label">Company Number</div>
+            <div class="field-value" id="f-company-num"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Trading Address + Director -->
+    <div class="grid-2">
+
+      <!-- Trading Address -->
+      <div class="card">
+        <div class="card-header"><span class="card-icon">📍</span><span class="card-title">Trading Address</span></div>
+        <div class="card-body">
+          <div class="field-value" id="f-trade-addr" style="line-height:1.7"></div>
+        </div>
+      </div>
+
+      <!-- Director -->
+      <div class="card">
+        <div class="card-header"><span class="card-icon">🪪</span><span class="card-title">Director / Proprietor</span></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:14px">
+          <div class="field-row">
+            <div class="field-label">Full Name</div>
+            <div class="field-value" id="f-dir-name"></div>
+          </div>
+          <div class="field-row">
+            <div class="field-label">Date of Birth</div>
+            <div class="field-value" id="f-dir-dob"></div>
+          </div>
+          <div class="field-sep"></div>
+          <div class="field-row">
+            <div class="field-label">Home Address</div>
+            <div class="field-value" id="f-dir-addr" style="line-height:1.7"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Documents -->
+    <div class="card">
+      <div class="card-header"><span class="card-icon">📎</span><span class="card-title">Documents</span></div>
+      <div class="card-body">
+        <div class="doc-list" id="doc-list">
+          <div class="doc-empty">No documents uploaded yet.</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /page -->
+
+<script>
+  const params   = new URLSearchParams(location.search);
+  const recordId = params.get('id');
+
+  if (!recordId) {
+    showError('No record ID in URL. Add ?id=recXXX to the URL.');
+  } else {
+    loadRecord(recordId);
+  }
+
+  async function loadRecord(id) {
+    try {
+      const res  = await fetch(`/api/airtable-get?id=${encodeURIComponent(id)}`);
+      const data = await res.json();
+      if (!res.ok || !data.id) throw new Error(data.error || 'Record not found');
+      render(data);
+    } catch (err) {
+      showError(err.message || 'Failed to load record');
+    }
+  }
+
+  function v(f, fields) { return fields[f] || null; }
+
+  function render(record) {
+    const f = record.fields || {};
+
+    // ── Hero ──
+    const company  = f['Company Name'] || f['Trading Name'] || '—';
+    const trading  = f['Trading Name'] && f['Trading Name'] !== f['Company Name'] ? f['Trading Name'] : '';
+    const status   = f['Status'] || '';
+
+    document.getElementById('h-company').textContent = company;
+    if (trading) {
+      document.getElementById('h-trading').textContent = 'Trading as: ' + trading;
+      document.getElementById('h-dot').style.display = '';
+    }
+
+    const badgeEl = document.getElementById('h-status');
+    badgeEl.innerHTML = renderStatusBadge(status);
+
+    const dates = [];
+    if (record.createdTime) dates.push('Created ' + fmtDate(record.createdTime));
+    if (f['Last Modified']) dates.push('Updated ' + fmtDate(f['Last Modified']));
+    document.getElementById('h-dates').textContent = dates.join('  ·  ');
+
+    document.getElementById('hero-section').style.display = '';
+
+    // ── Contact ──
+    const firstName = f['First_Name'] || '';
+    const lastName  = f['Last_Name']  || '';
+    const fullName  = [firstName, lastName].filter(Boolean).join(' ') || '—';
+    const email     = f['Email'] || '';
+    const phone     = f['Phone'] || '';
+    const website   = f['Website'] || '';
+
+    document.getElementById('f-name').textContent = fullName;
+    document.getElementById('f-email').innerHTML  = email
+      ? `<a href="mailto:${email}">${email}</a>` : '<span class="empty">—</span>';
+    document.getElementById('f-phone').innerHTML  = phone
+      ? `<a href="tel:${phone}">${phone}</a>` : '<span class="empty">—</span>';
+
+    if (website) {
+      const href = website.startsWith('http') ? website : 'https://' + website;
+      document.getElementById('f-website').innerHTML = `<a href="${href}" target="_blank">${website}</a>`;
+      document.getElementById('row-website').style.display = '';
+    }
+
+    // Action buttons
+    if (email) document.getElementById('act-email').href = 'mailto:' + email;
+    if (phone) document.getElementById('act-phone').href = 'tel:'    + phone;
+
+    // ── Business ──
+    const volume  = f['What is your current monthly transaction value? (£ GBP)'];
+    const savings = f['Savings'];
+
+    setVal('f-volume',  volume  ? '£' + Number(volume).toLocaleString()  : null);
+    setVal('f-savings', savings ? savings : null);
+    setVal('f-biztype', f['Type of business']);
+    setVal('f-trading-length', f['How long have you been trading for?']);
+
+    // Card machine
+    const cm = f['Are you currently using a card machine?'];
+    if (cm) {
+      const cls = cm === 'Yes' ? 'yes' : cm === 'Just Exploring' ? 'neutral' : 'no';
+      document.getElementById('f-card-machine').innerHTML = `<span class="pill ${cls}">${cm}</span>`;
+    } else {
+      document.getElementById('f-card-machine').innerHTML = '<span class="empty">—</span>';
+    }
+
+    // VAT
+    const vat = f['Are you VAT registered?'];
+    if (vat !== null && vat !== undefined) {
+      const vatText = vat === true || vat === 'Yes' ? 'Yes' : 'No';
+      const vatCls  = vatText === 'Yes' ? 'yes' : 'no';
+      document.getElementById('f-vat').innerHTML = `<span class="pill ${vatCls}">${vatText}</span>`;
+      if (vatText === 'Yes' && f['VAT Number']) {
+        document.getElementById('f-vat-num').textContent = f['VAT Number'];
+        document.getElementById('row-vat-num').style.display = '';
+      }
+    } else {
+      document.getElementById('f-vat').innerHTML = '<span class="empty">—</span>';
+    }
+
+    // Company number
+    const companyNum = f['Company Number'];
+    if (companyNum) {
+      document.getElementById('f-company-num').textContent = companyNum;
+      document.getElementById('row-company-num').style.display = '';
+      const chLink = document.getElementById('act-ch');
+      chLink.href = `https://find-and-update.company-information.service.gov.uk/company/${companyNum}`;
+      chLink.style.display = '';
+    }
+
+    // ── Trading Address ──
+    const tAddr   = f['Address (Trading address)'];
+    const tCity   = f['City (Trading address)'];
+    const tCounty = f['State/Province (Trading address)'];
+    const tPost   = f['Zip/Postal code (Trading address)'];
+    const tCountry= f['Country (Trading address)'];
+    document.getElementById('f-trade-addr').innerHTML = buildAddress(tAddr, tCity, tCounty, tPost, tCountry);
+
+    // ── Director ──
+    setVal('f-dir-name', f["Director's / Proprietor Full Name"]);
+
+    const dob = f["Director's / Proprietor Date of Birth"];
+    document.getElementById('f-dir-dob').textContent = dob ? fmtDOB(dob) : '—';
+
+    const dAddr   = f["Address (Director's / Proprietor Address)"];
+    const dCity   = f["City (Director's / Proprietor Address)"];
+    const dCounty = f["State/Province (Director's / Proprietor Address)"];
+    const dPost   = f["Zip/Postal code (Director's / Proprietor Address)"];
+    const dCountry= f["Country (Director's / Proprietor Address)"];
+    document.getElementById('f-dir-addr').innerHTML = buildAddress(dAddr, dCity, dCounty, dPost, dCountry);
+
+    // ── Documents ──
+    const docFields = [
+      { label: 'Passport or Driving Licence', field: 'Passport or Full Driving Licence', icon: '🪪' },
+      { label: 'Avantis Document',             field: 'Avantis Document',                 icon: '📄' },
+      { label: "Director's Utility Bill",      field: "Director's utility bill with address (within last 3 months)", icon: '🏠' },
+      { label: 'Business Utility / Invoice',   field: 'Any business utility bill with address or purchase invoice (within last 3 months)', icon: '🏢' },
+      { label: 'Business Bank Statement',      field: 'Business bank statement (within last 3 months)', icon: '🏦' },
+    ];
+
+    const docList = document.getElementById('doc-list');
+    const docItems = [];
+
+    docFields.forEach(({ label, field, icon }) => {
+      const attachments = f[field];
+      if (!Array.isArray(attachments) || !attachments.length) return;
+      attachments.forEach(att => {
+        docItems.push({ label, icon, url: att.url, filename: att.filename || 'document' });
+      });
+    });
+
+    if (docItems.length) {
+      docList.innerHTML = docItems.map(d => `
+        <a class="doc-item" href="${d.url}" target="_blank" rel="noopener">
+          <div class="doc-icon">${d.icon}</div>
+          <div class="doc-info">
+            <div class="doc-name">${escHtml(d.filename)}</div>
+            <div class="doc-type">${escHtml(d.label)}</div>
+          </div>
+          <div class="doc-download">↗ Open</div>
+        </a>
+      `).join('');
+    }
+
+    // Show content
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('content').style.display = '';
+  }
+
+  // ── Helpers ──
+  function setVal(id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (value) {
+      el.textContent = value;
+    } else {
+      el.innerHTML = '<span class="empty">—</span>';
+    }
+  }
+
+  function buildAddress(line1, city, county, postcode, country) {
+    const parts = [line1, city, county, postcode, country].filter(Boolean);
+    if (!parts.length) return '<span class="empty">—</span>';
+    return parts.join('<br>');
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function fmtDOB(str) {
+    if (!str) return '—';
+    // Airtable returns date as YYYY-MM-DD
+    const parts = str.split('-');
+    if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    return str;
+  }
+
+  function renderStatusBadge(status) {
+    let cls = 'grey';
+    if (!status) return '';
+    if (status.toLowerCase().includes('submitted') || status.toLowerCase().includes('complete')) cls = 'green';
+    else if (status.toLowerCase().includes('director') || status.toLowerCase().includes('detail')) cls = 'blue';
+    else if (status.toLowerCase().includes('quote') || status.toLowerCase().includes('savings')) cls = 'amber';
+    return `<span class="status-badge ${cls}">${escHtml(status)}</span>`;
+  }
+
+  function escHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function showError(msg) {
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('error-msg').textContent = msg;
+    document.getElementById('error-state').style.display = '';
+  }
+</script>
+</body>
+</html>
