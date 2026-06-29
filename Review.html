@@ -200,6 +200,7 @@
     <div class="actions">
       <a id="act-email"   class="btn btn-primary" href="#">✉ Email</a>
       <a id="act-phone"   class="btn btn-outline"  href="#">📞 Call</a>
+      <a id="act-crm"     class="btn btn-ghost"    href="#" target="_blank" style="display:none">👤 CRM</a>
       <a id="act-ch"      class="btn btn-ghost"    href="#" target="_blank" style="display:none">🏢 Companies House</a>
       <button class="btn btn-ghost" onclick="window.print()">🖨 Print</button>
     </div>
@@ -393,6 +394,13 @@
     // Action buttons
     if (email) document.getElementById('act-email').href = 'mailto:' + email;
     if (phone) document.getElementById('act-phone').href = 'tel:'    + phone;
+
+    const ghlId = f['GHL Contact ID'];
+    if (ghlId) {
+      const crmBtn = document.getElementById('act-crm');
+      crmBtn.href = `https://app.cr8or.ai/v2/location/8qkx5Hada8mesjOqMckj/contacts/detail/${ghlId}`;
+      crmBtn.style.display = '';
+    }
 
     // ── Business ──
     const volume  = f['What is your current monthly transaction value? (£ GBP)'];

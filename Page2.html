@@ -572,6 +572,7 @@
     let chDirectors       = [];      // active directors from CH
     let selectedDobPartial = null;  // { month, year } from CH
     let directorSelectHidden = false;
+    let ghlContactId      = null;   // GHL contact ID, captured from Airtable prefill
 
     // ── helpers ──
     function setVal(id, val) { const el = document.getElementById(id); if (el && val) el.value = val; }
@@ -612,6 +613,9 @@
         const res = await fetch(`/api/airtable-get?id=${encodeURIComponent(recordId)}`);
         if (!res.ok) { if (!chTriggered) initDirectorSection([]); return; }
         const { fields } = await res.json();
+
+        // Capture GHL Contact ID for use at submit time
+        if (fields['GHL Contact ID']) ghlContactId = fields['GHL Contact ID'];
 
         // Fill any fields that aren't already set from sessionStorage
         if (fields['First_Name'] && document.getElementById('name-display').textContent === 'your business') {
@@ -1031,6 +1035,29 @@
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ recordId: id, fields: { 'Url': `https://avantis-direct-form.vercel.app/page3?id=${encodeURIComponent(id)}` } })
+          }).catch(() => {});
+        }
+
+        // Update GHL contact with business details (fire-and-forget)
+        if (ghlContactId) {
+          fetch('/api/ghl-update-contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contactId:     ghlContactId,
+              firstName:     fields['First_Name'],
+              lastName:      fields['Last_Name'],
+              email:         fields['Email'],
+              phone:         fields['Phone'],
+              companyName:   fields['Company Name'],
+              website:       fields['Website'],
+              address1:      fields['Address (Trading address)'],
+              city:          fields['City (Trading address)'],
+              state:         fields['State/Province (Trading address)'],
+              postalCode:    fields['Zip/Postal code (Trading address)'],
+              typeOfBusiness: fields['Type of business'],
+              tradingLength:  fields['How long have you been trading for?'],
+            })
           }).catch(() => {});
         }
 

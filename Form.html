@@ -1350,15 +1350,17 @@
           ? `https://avantis-direct-form.vercel.app/page2?id=${encodeURIComponent(id)}`
           : 'https://avantis-direct-form.vercel.app/page2';
 
-        // Fire webhook WITH record ID now that we have it
-        fetch(WEBHOOK, {
+        // Create GHL contact (fire-and-forget — also saves GHL Contact ID to Airtable server-side)
+        fetch('/api/ghl-create-contact', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            firstName, lastName, email, phone, company, companyNumber,
-            qualifier: qualifierValue, noCompany: noCompanySelected,
-            recordId: id || '', nextStepUrl: page2Url,
-            submittedAt: new Date().toISOString(), source: page2Url, fbclid, ...utmData
+            firstName, lastName, email, phone,
+            companyName: company,
+            recordId: id || '',
+            cardMachine: qualifierValue === 'yes-terminal' ? 'Yes'
+                       : qualifierValue === 'exploring'    ? 'Just Exploring'
+                       : 'No',
           })
         }).catch(() => {});
 
@@ -1373,13 +1375,15 @@
 
         window.location.href = '/page2' + (id ? '?id=' + encodeURIComponent(id) : '');
       } catch {
-        fetch(WEBHOOK, {
+        fetch('/api/ghl-create-contact', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            firstName, lastName, email, phone, company, companyNumber,
-            qualifier: qualifierValue, noCompany: noCompanySelected,
-            recordId: '', submittedAt: new Date().toISOString(), source: window.location.href, fbclid, ...utmData
+            firstName, lastName, email, phone, companyName: company,
+            recordId: '',
+            cardMachine: qualifierValue === 'yes-terminal' ? 'Yes'
+                       : qualifierValue === 'exploring'    ? 'Just Exploring'
+                       : 'No',
           })
         }).catch(() => {});
         window.location.href = '/page2';
