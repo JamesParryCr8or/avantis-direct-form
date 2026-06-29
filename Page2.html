@@ -706,6 +706,15 @@
         document.getElementById('director-select-field').style.display = 'none';
         directorSelectHidden = true;
         onDirectorSelect('__manual');
+        // Re-apply sole trader name prefill (onDirectorSelect clears the field)
+        try {
+          if (sessionStorage.getItem('avantis_sole_trader') === '1') {
+            const fd = JSON.parse(sessionStorage.getItem('avantis_form_data') || '{}');
+            const fullName = [fd.firstName, fd.lastName].filter(Boolean).join(' ');
+            const nameEl = document.getElementById('p2-director-name');
+            if (fullName && nameEl && !nameEl.value) nameEl.value = fullName;
+          }
+        } catch {}
         return;
       }
 
