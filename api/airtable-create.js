@@ -28,6 +28,10 @@ module.exports = async function handler(req, res) {
     );
 
     const data = await atRes.json();
+    if (!atRes.ok) {
+      console.error('Airtable 422 detail:', JSON.stringify(data));
+      console.error('Fields sent:', JSON.stringify(fields));
+    }
     return res.status(atRes.status).json(data);
   } catch (err) {
     console.error('Airtable create error:', err);
