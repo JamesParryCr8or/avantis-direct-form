@@ -56,34 +56,41 @@ module.exports = async function handler(req, res) {
     const contactId = createData.contact?.id;
     console.log('GHL contact created:', contactId);
 
-    // 2. Add to onboarding workflow (fire-and-forget)
+    // 2. Add to onboarding workflow (awaited — Vercel kills function on res.json())
     if (contactId) {
-      fetch(`${GHL_URL}/contacts/${contactId}/workflow/${WORKFLOW_ID}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type':  'application/json',
-          'Accept':        'application/json',
-          'Authorization': `Bearer ${GHL_TOKEN}`,
-          'Version':       '2023-02-21',
-        },
-        body: JSON.stringify({ eventStartTime: new Date().toISOString() }),
-      })
-        .then(r => r.text().then(t => console.log('GHL workflow:', r.status, t)))
-        .catch(err => console.error('GHL workflow error:', err));
+      try {
+        const wfRes  = await fetch(`${GHL_URL}/contacts/${contactId}/workflow/${WORKFLOW_ID}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'Accept':        'application/json',
+            'Authorization': `Bearer ${GHL_TOKEN}`,
+            'Version':       '2021-07-28',
+          },
+          body: JSON.stringify({ eventStartTime: new Date().toISOString() }),
+        });
+        const wfText = await wfRes.text();
+        console.log('GHL workflow:', wfRes.status, wfText);
+      } catch (err) {
+        console.error('GHL workflow error:', err);
+      }
     }
 
-    // 3. Write GHL Contact ID back to Airtable (fire-and-forget)
+    // 3. Write GHL Contact ID back to Airtable (awaited)
     if (contactId && recordId && AT_PAT) {
-      fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_TABLE}/${recordId}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${AT_PAT}`,
-          'Content-Type':  'application/json',
-        },
-        body: JSON.stringify({ fields: { 'GHL Contact ID': contactId } }),
-      })
-        .then(r => console.log('Airtable GHL ID saved:', r.status))
-        .catch(err => console.error('Airtable GHL ID error:', err));
+      try {
+        const atRes = await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_TABLE}/${recordId}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${AT_PAT}`,
+            'Content-Type':  'application/json',
+          },
+          body: JSON.stringify({ fields: { 'GHL Contact ID': contactId } }),
+        });
+        console.log('Airtable GHL ID saved:', atRes.status);
+      } catch (err) {
+        console.error('Airtable GHL ID error:', err);
+      }
     }
 
     return res.status(200).json({ ok: true, contactId });
