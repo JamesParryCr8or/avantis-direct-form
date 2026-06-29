@@ -295,8 +295,17 @@
   </div>
 
   <script>
-    const params   = new URLSearchParams(window.location.search);
-    const recordId = params.get('id') || null;
+    const params      = new URLSearchParams(window.location.search);
+    const recordId    = params.get('id') || null;
+    const soleTrader  = sessionStorage.getItem('avantis_sole_trader') === '1';
+
+    // Show extra document cards for registered-company applicants
+    if (!soleTrader) {
+      ['card-utility', 'card-bank', 'card-bizutil'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = '';
+      });
+    }
 
     // Airtable field IDs for each document
     const FIELD_IDS = {
@@ -404,8 +413,9 @@
 
     async function submitDocuments() {
       // Validate all required files are selected
+      const requiredKeys = soleTrader ? ['passport'] : ['passport', 'utility', 'bank', 'bizutil'];
       let valid = true;
-      ['passport'].forEach(key => {
+      requiredKeys.forEach(key => {
         if (!files[key]) {
           document.getElementById('card-' + key).classList.add('has-error');
           document.getElementById('err-' + key).classList.add('show');
@@ -423,7 +433,7 @@
       btn.disabled = true;
       btn.textContent = 'Uploading documents…';
 
-      const keys = ['passport'];
+      const keys = soleTrader ? ['passport'] : ['passport', 'utility', 'bank', 'bizutil'];
       let allOk = true;
 
       for (const key of keys) {
