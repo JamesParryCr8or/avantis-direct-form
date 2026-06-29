@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avantis Direct – Cut Your Card Fees to 0.35%</title>
+  <link rel="icon"
+    href="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://avantisdirect.com&size=256">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <!-- Facebook Pixel -->
+  <script>
+    !function (f, b, e, v, n, t, s) {
+      if (f.fbq) return; n = f.fbq = function () {
+        n.callMethod ?
+        n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+      }; if (!f._fbq) f._fbq = n;
+      n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = []; t = b.createElement(e); t.async = !0;
+      t.src = v; s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s)
+    }(window,
+      document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1693205211524673');
+    fbq('track', 'PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+      src="https://www.facebook.com/tr?id=1693205211524673&ev=PageView&noscript=1" /></noscript>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --navy: #0a1628;
+      --navy-mid: #132240;
+      --blue: #1a5cff;
+      --blue-light: #3b7aff;
+      --cyan: #00d4ff;
+      --green: #00e676;
+      --green-dark: #00c853;
+      --white: #ffffff;
+      --off-white: #f0f4ff;
+      --grey: #8896b3;
+      --grey-light: #dde3f0;
+      --error: #ff4757;
+      --gold: #ffc107;
+    }
+
+    html,
+    body {
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+    }
+
+    /* ── LAYOUT ── */
+    .page {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    /* ── LEFT PANEL ── */
+    .left {
+      background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 60%, #071020 100%);
+      padding: 40px 56px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      min-height: 100vh;
+    }
+
+    .left::before {
+      content: '';
+      position: absolute;
+      top: -120px;
+      right: -80px;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .left::after {
+      content: '';
+      position: absolute;
+      bottom: 80px;
+      left: -100px;
+      width: 350px;
+      height: 350px;
+      background: radial-gradient(circle, rgba(26, 92, 255, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Logo with white background */
+    .logo-wrap {
+      display: inline-flex;
+      align-items: center;
+      background: #ffffff;
+      border-radius: 10px;
+      padding: 8px 14px;
+      margin-bottom: 36px;
+      width: fit-content;
+    }
+
+    .logo {
+      height: 34px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .headline-eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 14px;
+    }
+
+    .headline {
+      font-size: clamp(28px, 3.2vw, 44px);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 8px;
+      letter-spacing: -0.02em;
+    }
+
+    .headline .rate {
+      display: inline-block;
+      background: linear-gradient(90deg, var(--cyan), var(--blue-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subheadline {
+      font-size: 16px;
+      font-weight: 400;
+      color: #a8b8d8;
+      line-height: 1.6;
+      margin-bottom: 28px;
+      max-width: 420px;
+    }
+
+    .subheadline strong {
+      color: var(--white);
+      font-weight: 600;
+    }
+
+    /* savings pill */
+    .savings-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0, 230, 118, 0.12);
+      border: 1px solid rgba(0, 230, 118, 0.3);
+      border-radius: 100px;
+      padding: 10px 20px;
+      margin-bottom: 28px;
+      width: fit-content;
+    }
+
+    .savings-pill .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      flex-shrink: 0;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.4
+      }
+    }
+
+    .savings-pill span {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--green);
+    }
+
+    /* card machine image — fixed height so reviews always show */
+    .card-image-wrap {
+      flex: 0 0 180px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 24px;
+    }
+
+    .card-image-wrap img {
+      max-width: 100%;
+      max-height: 180px;
+      object-fit: contain;
+      filter: drop-shadow(0 24px 48px rgba(0, 212, 255, 0.18));
+      position: relative;
+      z-index: 1;
+    }
+
+    /* reviews strip — pushed to bottom via margin-top: auto */
+    .reviews-strip {
+      margin-top: auto;
+      padding: 18px 22px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+    }
+
+    .stars {
+      color: var(--gold);
+      font-size: 18px;
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+    }
+
+    .review-text {
+      font-size: 13px;
+      color: #a8b8d8;
+      font-style: italic;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+
+    .review-author {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--grey);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .review-dots {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .review-dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .review-dots span.active {
+      background: var(--cyan);
+    }
+
+    /* ── RIGHT PANEL ── */
+    .right {
+      background: var(--off-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 40px;
+    }
+
+    .form-card {
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .form-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .form-subtitle {
+      font-size: 14px;
+      color: #5a6a88;
+      margin-bottom: 32px;
+      line-height: 1.5;
+    }
+
+    /* progress */
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .progress-step {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--grey);
+      transition: color 0.3s;
+    }
+
+    .progress-step.active {
+      color: var(--blue);
+    }
+
+    .progress-step.done {
+      color: var(--green-dark);
+    }
+
+    .step-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      border: 2px solid currentColor;
+      flex-shrink: 0;
+      transition: all 0.3s;
+    }
+
+    .progress-step.active .step-num {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: white;
+    }
+
+    .progress-step.done .step-num {
+      background: var(--green-dark);
+      border-color: var(--green-dark);
+      color: white;
+    }
+
+    .progress-step.done .step-num::before {
+      content: '✓';
+    }
+
+    .progress-line {
+      flex: 1;
+      height: 2px;
+      background: var(--grey-light);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-line-fill {
+      height: 100%;
+      background: var(--green-dark);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.4s ease;
+    }
+
+    /* ── STEPS ── */
+    .step {
+      display: none;
+    }
+
+    .step.visible {
+      display: block;
+      animation: fadeUp 0.3s ease;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* back button */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: none;
+      border: none;
+      color: var(--grey);
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 18px;
+      transition: color 0.2s;
+    }
+
+    .back-btn:hover {
+      color: var(--navy);
+    }
+
+    /* qualifier step */
+    .qualifier-q {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    .qualifier-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .qualifier-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      border: 2px solid var(--grey-light);
+      border-radius: 12px;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .qualifier-btn:hover {
+      border-color: var(--blue);
+      background: #f0f5ff;
+      transform: translateX(4px);
+    }
+
+    .qualifier-btn.selected {
+      border-color: var(--blue);
+      background: #edf2ff;
+    }
+
+    .qualifier-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background: var(--off-white);
+      flex-shrink: 0;
+    }
+
+    .qualifier-btn-text strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 2px;
+    }
+
+    .qualifier-btn-text small {
+      font-size: 12px;
+      color: var(--grey);
+    }
+
+    /* form fields */
+    .field {
+      margin-bottom: 18px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #3a4a68;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 7px;
+    }
+
+    .field-wrap {
+      position: relative;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 13px 16px;
+      border: 2px solid var(--grey-light);
+      border-radius: 10px;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      color: var(--navy);
+      background: white;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+    }
+
+    .field input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(26, 92, 255, 0.12);
+    }
+
+    .field input.valid {
+      border-color: var(--green-dark);
+    }
+
+    .field input.invalid {
+      border-color: var(--error);
+    }
+
+    .field-icon {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      pointer-events: none;
+    }
+
+    .field-error {
+      font-size: 12px;
+      color: var(--error);
+      margin-top: 5px;
+      display: none;
+      font-weight: 500;
+    }
+
+    .field-error.show {
+      display: block;
+    }
+
+    /* enhanced company suggestions */
+    .company-suggestions {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: white;
+      border: 2px solid var(--grey-light);
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      z-index: 100;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .company-suggestions.open {
+      display: block;
+    }
+
+    .suggestion-item {
+      padding: 11px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--grey-light);
+      transition: background 0.15s;
+    }
+
+    .suggestion-item:last-child {
+      border-bottom: none;
+    }
+
+    .suggestion-item:hover,
+    .suggestion-item.highlighted {
+      background: #f0f5ff;
+    }
+
+    .s-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 3px;
+    }
+
+    .s-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--navy);
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .s-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 2px 7px;
+      border-radius: 100px;
+      flex-shrink: 0;
+    }
+
+    .status-active {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-dissolved {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .status-other {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .s-meta {
+      font-size: 11px;
+      color: var(--grey);
+      display: flex;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+
+    .s-address {
+      font-size: 11px;
+      color: var(--grey);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .suggestion-loading {
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--grey);
+      text-align: center;
+    }
+
+    /* "no company" dashed button */
+    .no-company-btn {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 11px 16px;
+      border: 1.5px dashed var(--grey-light);
+      border-radius: 10px;
+      background: transparent;
+      color: var(--grey);
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .no-company-btn:hover {
+      border-color: var(--blue);
+      color: var(--blue);
+      background: rgba(26, 92, 255, 0.04);
+    }
+
+    /* CTA button */
+    .cta-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--blue) 0%, #0040dd 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 800;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+      letter-spacing: 0.01em;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(26, 92, 255, 0.4);
+    }
+
+    .cta-btn:active {
+      transform: translateY(0);
+    }
+
+    .cta-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .trust-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--grey);
+    }
+
+    .trust-line span {
+      font-size: 14px;
+    }
+
+    /* success state */
+    .success-screen {
+      text-align: center;
+      padding: 20px 0;
+      display: none;
+    }
+
+    .success-icon {
+      width: 72px;
+      height: 72px;
+      background: linear-gradient(135deg, var(--green), var(--green-dark));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 24px;
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from {
+        transform: scale(0);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .success-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 10px;
+    }
+
+    .success-body {
+      font-size: 15px;
+      color: #5a6a88;
+      line-height: 1.6;
+      max-width: 340px;
+      margin: 0 auto;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .page {
+        grid-template-columns: 1fr;
+      }
+
+      .left {
+        padding: 28px 24px 32px;
+        min-height: auto;
+      }
+
+      .card-image-wrap {
+        flex: 0 0 140px;
+        margin-bottom: 16px;
+      }
+
+      .card-image-wrap img {
+        max-height: 140px;
+      }
+
+      .reviews-strip {
+        margin-top: 20px;
+      }
+
+      .right {
+        padding: 32px 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="page">
+
+    <!-- ═══════════ LEFT ═══════════ -->
+    <div class="left">
+
+      <div class="logo-wrap">
+        <img class="logo" src="https://avantisdirect.com/wp-content/uploads/2025/04/pixel-free-logo.png"
+          alt="Avantis Direct" onerror="this.parentElement.style.display='none'">
+      </div>
+
+      <p class="headline-eyebrow">POS Systems &amp; Card Processing</p>
+
+      <h1 class="headline">
+        Slash Your Card Fees<br>
+        to <span class="rate">0.35%</span>
+      </h1>
+
+      <p class="subheadline">
+        We promise to beat your current rates — or there's nothing to pay.<br>
+        <strong>Some merchants save up to 50%</strong> on monthly processing costs.
+      </p>
+
+      <div class="savings-pill">
+        <span class="dot"></span>
+        <span>Saving businesses money across the UK</span>
+      </div>
+
+      <div class="card-image-wrap">
+        <img src="https://avantisdirect.com/wp-content/uploads/2025/03/card-machines-section-1-1.png"
+          alt="Avantis card terminal">
+      </div>
+
+      <!-- rotating reviews -->
+      <div class="reviews-strip">
+        <div class="stars">★★★★★</div>
+        <div class="review-text" id="review-text">"Saleem was so helpful, went above and beyond to make sure we were
+          happy. Whatever Avantis are paying him is not enough."</div>
+        <div class="review-author" id="review-author">— Paul Brackstone, Mexbox</div>
+        <div class="review-dots">
+          <span class="active" onclick="goReview(0)"></span>
+          <span onclick="goReview(1)"></span>
+          <span onclick="goReview(2)"></span>
+          <span onclick="goReview(3)"></span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════════ RIGHT ═══════════ -->
+    <div class="right">
+      <div class="form-card">
+
+        <!-- progress bar -->
+        <div class="progress-wrap" id="progress-wrap">
+          <div class="progress-step active" id="ps-1">
+            <div class="step-num">1</div>
+            Quick check
+          </div>
+          <div class="progress-line">
+            <div class="progress-line-fill" id="pl-1"></div>
+          </div>
+          <div class="progress-step" id="ps-2">
+            <div class="step-num">2</div>
+            Your company
+          </div>
+          <div class="progress-line">
+            <div class="progress-line-fill" id="pl-2"></div>
+          </div>
+          <div class="progress-step" id="ps-3">
+            <div class="step-num">3</div>
+            Your details
+          </div>
+        </div>
+
+        <div class="form-title" id="form-title">One quick question…</div>
+        <div class="form-subtitle" id="form-subtitle">It helps us tailor your free quote</div>
+
+        <!-- ─── STEP 1: qualifier ─── -->
+        <div class="step visible" id="step-1">
+          <p class="qualifier-q">Are you currently paying card processing fees?</p>
+          <div class="qualifier-options">
+            <button class="qualifier-btn" onclick="selectQualifier(this, 'yes-terminal')">
+              <div class="qualifier-icon">💳</div>
+              <div class="qualifier-btn-text">
+                <strong>Yes — I have a card terminal</strong>
+                <small>I want to see if I can save money</small>
+              </div>
+            </button>
+            <button class="qualifier-btn" onclick="selectQualifier(this, 'new-business')">
+              <div class="qualifier-icon">🚀</div>
+              <div class="qualifier-btn-text">
+                <strong>No — setting up a new business</strong>
+                <small>I need to accept card payments for the first time</small>
+              </div>
+            </button>
+            <button class="qualifier-btn" onclick="selectQualifier(this, 'exploring')">
+              <div class="qualifier-icon">🔍</div>
+              <div class="qualifier-btn-text">
+                <strong>Just exploring options</strong>
+                <small>Comparing providers before I decide</small>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- ─── STEP 2: company lookup (before contact details) ─── -->
+        <div class="step" id="step-2">
+          <button class="back-btn" onclick="goBack(1)">← Back</button>
+
+          <div class="field">
+            <label>Company name</label>
+            <div class="field-wrap">
+              <input type="text" id="f-company" placeholder="Start typing your company name…" autocomplete="off"
+                oninput="lookupCompany()">
+              <span class="field-icon" id="icon-company"></span>
+              <div class="company-suggestions" id="company-suggestions"></div>
+            </div>
+            <div class="field-error" id="err-company">Please enter your company name</div>
+            <button class="no-company-btn" onclick="noCompany()">
+              🏪 I don't have a registered company — new business or sole trader
+            </button>
+          </div>
+
+          <button class="cta-btn" id="step2-btn" onclick="goToContacts()">Continue →</button>
+          <div class="trust-line"><span>🔒</span> We never share your details with third parties</div>
+        </div>
+
+        <!-- ─── STEP 3: contact details ─── -->
+        <div class="step" id="step-3">
+          <button class="back-btn" onclick="goBack(2)">← Back</button>
+
+          <div class="field">
+            <label>Full name</label>
+            <div class="field-wrap">
+              <input type="text" id="f-name" placeholder="e.g. James Smith" autocomplete="name"
+                oninput="validateName()">
+              <span class="field-icon" id="icon-name"></span>
+            </div>
+            <div class="field-error" id="err-name">Please enter your full name</div>
+          </div>
+
+          <div class="field">
+            <label>Email address</label>
+            <div class="field-wrap">
+              <input type="email" id="f-email" placeholder="james@business.co.uk" autocomplete="email"
+                oninput="validateEmail()">
+              <span class="field-icon" id="icon-email"></span>
+            </div>
+            <div class="field-error" id="err-email">Please enter a valid email address</div>
+          </div>
+
+          <div class="field">
+            <label>Mobile number</label>
+            <div class="field-wrap">
+              <input type="tel" id="f-phone" placeholder="07700 900000" autocomplete="tel" maxlength="13"
+                oninput="validatePhone()">
+              <span class="field-icon" id="icon-phone"></span>
+            </div>
+            <div class="field-error" id="err-phone">Please enter a valid UK mobile number</div>
+          </div>
+
+          <button class="cta-btn" id="step3-btn" onclick="submitForm()">
+            Get My Free Quote 🎉
+          </button>
+          <div class="trust-line"><span>✅</span> Free quote, no obligation, no hard sell</div>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Reviews rotator ──
+    const reviews = [
+      { text: '"Saleem was so helpful, went above and beyond to make sure we were happy. Whatever Avantis are paying him is not enough."', author: '— Paul Brackstone, Mexbox' },
+      { text: '"As a young and inexperienced business owner, they helped me massively. Made the entire experience as smooth and simple as possible."', author: '— Ibraheem Khan, Business Owner' },
+      { text: '"Avantis Direct has been a game-changer for my business! Seamless, efficient, and their support is always quick and helpful."', author: '— Adil, Merchant' },
+      { text: '"Saleem was very helpful since day one — found me the best deal for my business. Would highly recommend!"', author: '— Zaheer Mohammed, Merchant' },
+    ];
+
+    let currentReview = 0;
+    function goReview(i) {
+      currentReview = i;
+      document.getElementById('review-text').textContent = reviews[i].text;
+      document.getElementById('review-author').textContent = reviews[i].author;
+      document.querySelectorAll('.review-dots span').forEach((d, idx) => d.classList.toggle('active', idx === i));
+    }
+    setInterval(() => goReview((currentReview + 1) % reviews.length), 5000);
+
+    // ── State ──
+    let qualifierValue = null;
+    let selectedCompany = null;
+    let noCompanySelected = false;
+    let companyLookupTimer = null;
+    let companiesData = [];
+    let highlightedCompanyIndex = -1;
+
+    // ── Step navigation ──
+    function selectQualifier(btn, value) {
+      document.querySelectorAll('.qualifier-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      qualifierValue = value;
+      setTimeout(() => goStep2(), 400);
+    }
+
+    function goStep2() {
+      showStep(2);
+      updateProgress(2);
+      document.getElementById('form-title').textContent = 'Your business';
+      document.getElementById('form-subtitle').textContent = 'Find your company using Companies House data';
+    }
+
+    function goToContacts() {
+      const companyVal = document.getElementById('f-company').value.trim();
+      if (!noCompanySelected && !companyVal) {
+        setFieldState('f-company', 'icon-company', 'err-company', false, 'Please enter your company name, or use the option below');
+        return;
+      }
+      showStep(3);
+      updateProgress(3);
+      document.getElementById('form-title').textContent = 'Almost done!';
+      document.getElementById('form-subtitle').textContent = 'Takes under 60 seconds';
+    }
+
+    function goBack(toStep) {
+      showStep(toStep);
+      updateProgress(toStep);
+      const titles = {
+        1: ['One quick question…', 'It helps us tailor your free quote'],
+        2: ['Your business', 'Find your company using Companies House data'],
+      };
+      const t = titles[toStep];
+      if (t) {
+        document.getElementById('form-title').textContent = t[0];
+        document.getElementById('form-subtitle').textContent = t[1];
+      }
+    }
+
+    function noCompany() {
+      noCompanySelected = true;
+      selectedCompany = null;
+      document.getElementById('f-company').value = '';
+      document.getElementById('company-suggestions').classList.remove('open');
+      setFieldState('f-company', 'icon-company', 'err-company', null, '');
+      goToContacts();
+    }
+
+    function showStep(n) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('visible'));
+      document.getElementById('step-' + n).classList.add('visible');
+    }
+
+    function updateProgress(step) {
+      for (let i = 1; i <= 3; i++) {
+        const ps = document.getElementById('ps-' + i);
+        ps.classList.remove('active', 'done');
+        if (i < step) ps.classList.add('done');
+        else if (i === step) ps.classList.add('active');
+      }
+      const pl1 = document.getElementById('pl-1');
+      const pl2 = document.getElementById('pl-2');
+      if (pl1) pl1.style.width = step > 1 ? '100%' : '0%';
+      if (pl2) pl2.style.width = step > 2 ? '100%' : '0%';
+    }
+
+    // ── Validation helpers ──
+    function setFieldState(id, iconId, errId, valid, msg) {
+      const input = document.getElementById(id);
+      const icon = document.getElementById(iconId);
+      const err = document.getElementById(errId);
+      input.classList.toggle('valid', valid === true);
+      input.classList.toggle('invalid', valid === false);
+      icon.textContent = valid === true ? '✅' : (valid === false ? '❌' : '');
+      if (err) {
+        err.classList.toggle('show', valid === false);
+        if (msg) err.textContent = msg;
+      }
+    }
+
+    function validateName() {
+      const v = document.getElementById('f-name').value.trim();
+      const ok = v.length >= 2 && v.includes(' ');
+      setFieldState('f-name', 'icon-name', 'err-name', v.length ? ok : null, 'Please enter your first and last name');
+      return ok;
+    }
+
+    function validateEmail() {
+      const v = document.getElementById('f-email').value.trim();
+      const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      setFieldState('f-email', 'icon-email', 'err-email', v.length ? ok : null, 'Please enter a valid email address');
+      return ok;
+    }
+
+    function validatePhone() {
+      const raw = document.getElementById('f-phone').value.replace(/\s/g, '');
+      const ok = /^(07\d{9}|\+447\d{9})$/.test(raw);
+      setFieldState('f-phone', 'icon-phone', 'err-phone', raw.length ? ok : null, 'Please enter a valid UK mobile number (e.g. 07700 900000)');
+      return ok;
+    }
+
+    function validateStep3() {
+      const n = validateName();
+      const e = validateEmail();
+      const p = validatePhone();
+      return n && e && p;
+    }
+
+    // ── UTM / click-ID capture ──
+    function getCookie(name) {
+      const m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+      return m ? decodeURIComponent(m[2]) : '';
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const fbclid = urlParams.get('fbclid') || '';
+    let fbc = getCookie('_fbc');
+    if (!fbc && fbclid) fbc = 'fb.1.' + Date.now() + '.' + fbclid;
+
+    // Keys match Airtable column names exactly
+    const utmData = {
+      utm_source: urlParams.get('utm_source') || '',
+      utm_medium: urlParams.get('utm_medium') || '',
+      utm_campaign: urlParams.get('utm_campaign') || '',
+      utm_content: urlParams.get('utm_content') || '',
+      utm_term: urlParams.get('utm_term') || '',
+      utm_id: urlParams.get('utm_id') || '',
+      device: urlParams.get('device') || '',
+      network: urlParams.get('network') || '',
+      matchtype: urlParams.get('matchtype') || '',
+      keyword: urlParams.get('keyword') || '',
+      adgroupid: urlParams.get('adgroupid') || '',
+      placement: urlParams.get('placement') || '',
+      adset_id: urlParams.get('adset_id') || '',
+      ad_id: urlParams.get('ad_id') || '',
+      site_source_name: urlParams.get('site_source_name') || '',
+      gclid: urlParams.get('gclid') || '',
+      fbp: getCookie('_fbp'),
+      fbc,
+    };
+
+    // ── Companies House lookup (via server proxy — avoids CORS) ──
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function formatCompanyDate(dateStr) {
+      try {
+        return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      } catch (e) { return dateStr; }
+    }
+
+    function renderSuggestions(items) {
+      const box = document.getElementById('company-suggestions');
+      if (!items.length) {
+        box.innerHTML = '<div class="suggestion-loading">No companies found — you can type your name manually</div>';
+        box.classList.add('open');
+        return;
+      }
+      box.innerHTML = items.slice(0, 8).map((c, i) => {
+        const sl = (c.company_status || '').toLowerCase();
+        const sc = sl === 'active' ? 'status-active' : sl === 'dissolved' ? 'status-dissolved' : 'status-other';
+        const dateStr = c.date_of_creation ? formatCompanyDate(c.date_of_creation) : '';
+        return `
+          <div class="suggestion-item${i === highlightedCompanyIndex ? ' highlighted' : ''}"
+               data-name="${escHtml(c.title)}"
+               data-number="${escHtml(c.company_number)}">
+            <div class="s-header">
+              <span class="s-name">${escHtml(c.title)}</span>
+              ${c.company_status ? `<span class="s-badge ${sc}">${escHtml(c.company_status)}</span>` : ''}
+            </div>
+            <div class="s-meta">
+              <span># ${escHtml(c.company_number)}</span>
+              ${dateStr ? `<span>· Inc. ${dateStr}</span>` : ''}
+            </div>
+            ${c.address_snippet ? `<div class="s-address">📍 ${escHtml(c.address_snippet)}</div>` : ''}
+          </div>`;
+      }).join('');
+      box.classList.add('open');
+    }
+
+    document.getElementById('company-suggestions').addEventListener('click', function (e) {
+      const item = e.target.closest('.suggestion-item');
+      if (item) pickCompany(item.dataset.name, item.dataset.number);
+    });
+
+    document.getElementById('f-company').addEventListener('keydown', function (e) {
+      const box = document.getElementById('company-suggestions');
+      if (!box.classList.contains('open') || !companiesData.length) return;
+      const max = Math.min(companiesData.length, 8) - 1;
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          highlightedCompanyIndex = Math.min(highlightedCompanyIndex + 1, max);
+          renderSuggestions(companiesData);
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          highlightedCompanyIndex = Math.max(highlightedCompanyIndex - 1, -1);
+          renderSuggestions(companiesData);
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (highlightedCompanyIndex >= 0) {
+            const c = companiesData[highlightedCompanyIndex];
+            pickCompany(c.title, c.company_number);
+          }
+          break;
+        case 'Escape':
+          box.classList.remove('open');
+          highlightedCompanyIndex = -1;
+          break;
+      }
+    });
+
+    async function lookupCompany() {
+      const query = document.getElementById('f-company').value.trim();
+      const box = document.getElementById('company-suggestions');
+      selectedCompany = null;
+      noCompanySelected = false;
+      setFieldState('f-company', 'icon-company', 'err-company', null, '');
+      highlightedCompanyIndex = -1;
+      companiesData = [];
+
+      if (query.length < 2) { box.classList.remove('open'); return; }
+
+      clearTimeout(companyLookupTimer);
+      companyLookupTimer = setTimeout(async () => {
+        box.innerHTML = '<div class="suggestion-loading">Searching…</div>';
+        box.classList.add('open');
+        try {
+          const res = await fetch(`/api/search-companies?q=${encodeURIComponent(query)}`);
+          const data = await res.json();
+          companiesData = data.items || [];
+          renderSuggestions(companiesData);
+        } catch (err) {
+          box.innerHTML = '<div class="suggestion-loading">Search unavailable — type your name manually</div>';
+        }
+      }, 350);
+    }
+
+    function pickCompany(name, number) {
+      document.getElementById('f-company').value = name;
+      selectedCompany = { name, number };
+      noCompanySelected = false;
+      document.getElementById('company-suggestions').classList.remove('open');
+      highlightedCompanyIndex = -1;
+      companiesData = [];
+      setFieldState('f-company', 'icon-company', 'err-company', true, '');
+    }
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#f-company') && !e.target.closest('#company-suggestions')) {
+        document.getElementById('company-suggestions').classList.remove('open');
+        highlightedCompanyIndex = -1;
+      }
+    });
+
+    // ── Submit ──
+    async function submitForm() {
+      if (!validateStep3()) return;
+
+      if (typeof fbq !== 'undefined') fbq('track', 'Lead');
+
+      const btn = document.getElementById('step3-btn');
+      btn.disabled    = true;
+      btn.textContent = 'Submitting…';
+
+      const fullName  = document.getElementById('f-name').value.trim();
+      const email     = document.getElementById('f-email').value.trim();
+      const phone     = document.getElementById('f-phone').value.trim();
+      const nameParts = fullName.split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName  = nameParts.slice(1).join(' ') || '';
+      const company   = noCompanySelected ? 'No registered company' : document.getElementById('f-company').value.trim();
+      const companyNumber = selectedCompany ? selectedCompany.number : '';
+
+      // LeadConnector — fire and forget
+      fetch('https://services.leadconnectorhq.com/hooks/8qkx5Hada8mesjOqMckj/webhook-trigger/c8912358-5289-4deb-9347-17876f91adf9', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName, lastName, email, phone, company, companyNumber,
+          qualifier: qualifierValue, noCompany: noCompanySelected,
+          submittedAt: new Date().toISOString(), source: window.location.href, fbclid, ...utmData }),
+        mode: 'no-cors'
+      }).catch(() => {});
+
+      const atFields = {
+        'Company Name': company,
+        'Company Number': companyNumber || undefined,
+        'Email': email,
+        "Director's / Proprietor Full Name": fullName,
+        'First_Name': firstName,
+        'Last_Name': lastName,
+        'Phone': phone,
+        'Url': window.location.href,
+        'Are you currently using a card machine?': qualifierValue === 'yes-terminal' ? 'Yes' : 'No',
+        'Status': 'Savings Quote Generated',
+        'Current step': 'Page 2',
+      };
+      Object.entries(utmData).forEach(([k, v]) => { if (v) atFields[k] = v; });
+      Object.keys(atFields).forEach(k => atFields[k] === undefined && delete atFields[k]);
+
+      try {
+        const atRes  = await fetch('/api/airtable-create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fields: atFields })
+        });
+        const atData = await atRes.json();
+        const id     = atRes.ok ? atData.id : null;
+        window.location.href = '/page2' + (id ? '?id=' + encodeURIComponent(id) : '');
+      } catch {
+        window.location.href = '/page2';
+      }
+    }
+  </script>
+</body>
+
+</html>

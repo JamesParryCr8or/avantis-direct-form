@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avantis Direct – Fast-Track Onboarding</title>
+  <link rel="icon" href="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://avantisdirect.com&size=256">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #0a1628; --blue: #1a5cff; --cyan: #00d4ff;
+      --green: #00e676; --green-dark: #00c853;
+      --white: #ffffff; --off-white: #f0f4ff;
+      --grey: #8896b3; --grey-light: #dde3f0;
+      --error: #ff4757; --gold: #ffc107;
+    }
+
+    html, body { min-height: 100vh; font-family: 'Inter', sans-serif; background: var(--navy); color: var(--white); }
+
+    .page { min-height: 100vh; display: grid; grid-template-columns: 380px 1fr; }
+
+    /* LEFT */
+    .left {
+      background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 60%, #071020 100%);
+      padding: 40px; display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh; overflow: hidden;
+    }
+    .left::before {
+      content: ''; position: absolute; top: -100px; right: -60px;
+      width: 360px; height: 360px;
+      background: radial-gradient(circle, rgba(0,230,118,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .logo-wrap { display: inline-flex; align-items: center; background: #fff; border-radius: 10px; padding: 8px 14px; margin-bottom: 32px; width: fit-content; }
+    .logo { height: 32px; object-fit: contain; display: block; }
+    .badge-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(0,200,83,0.15); border: 1px solid rgba(0,200,83,0.4);
+      border-radius: 100px; padding: 8px 16px; margin-bottom: 24px; width: fit-content;
+      font-size: 13px; font-weight: 700; color: var(--green-dark);
+    }
+    .left h1 { font-size: clamp(24px, 2.8vw, 34px); font-weight: 900; line-height: 1.15; margin-bottom: 16px; letter-spacing: -0.02em; }
+    .left h1 .hi { color: var(--cyan); }
+    .left-sub { font-size: 15px; color: #a8b8d8; line-height: 1.6; margin-bottom: 28px; }
+    .progress-steps { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .ps-item { display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 600; color: #a8b8d8; }
+    .ps-item.done { color: var(--green-dark); }
+    .ps-item.active { color: var(--white); }
+    .ps-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; border: 2px solid currentColor; }
+    .ps-item.done .ps-dot { background: var(--green-dark); border-color: var(--green-dark); color: white; }
+    .ps-item.active .ps-dot { background: var(--blue); border-color: var(--blue); color: white; }
+    .reviews-strip { margin-top: auto; padding: 18px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; backdrop-filter: blur(8px); }
+    .stars { color: var(--gold); font-size: 16px; letter-spacing: 2px; margin-bottom: 6px; }
+    .review-text { font-size: 12px; color: #a8b8d8; font-style: italic; line-height: 1.5; margin-bottom: 6px; }
+    .review-author { font-size: 11px; font-weight: 600; color: var(--grey); text-transform: uppercase; letter-spacing: 0.08em; }
+
+    /* RIGHT */
+    .right { background: var(--off-white); padding: 48px 48px 64px; overflow-y: auto; }
+    .form-wrap { max-width: 620px; }
+
+    .page-header { margin-bottom: 28px; }
+    .page-header h2 { font-size: 26px; font-weight: 900; color: var(--navy); letter-spacing: -0.02em; margin-bottom: 6px; }
+    .page-header p { font-size: 15px; color: #5a6a88; line-height: 1.5; }
+
+    /* CH loading banner */
+    .ch-banner {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; background: #eef3ff; border: 1px solid #c7d7ff;
+      border-radius: 10px; margin-bottom: 24px; font-size: 13px;
+      font-weight: 600; color: var(--blue);
+    }
+    .ch-banner .mini-spin {
+      width: 18px; height: 18px; flex-shrink: 0;
+      border: 2px solid #c7d7ff; border-top-color: var(--blue);
+      border-radius: 50%; animation: spin 0.6s linear infinite;
+    }
+    .ch-banner.success { background: #f0fff4; border-color: #bbf7d0; color: var(--green-dark); }
+    .ch-banner.success .mini-spin { display: none; }
+
+    .section-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--blue);
+      margin-bottom: 14px; margin-top: 32px; padding-bottom: 8px;
+      border-bottom: 2px solid var(--grey-light);
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 12px; font-weight: 700; color: #3a4a68; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .field label .req { color: var(--error); margin-left: 2px; }
+    .field-hint { font-size: 11px; color: var(--grey); margin-top: 4px; }
+
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 12px 14px;
+      border: 2px solid var(--grey-light); border-radius: 10px;
+      font-size: 15px; font-family: 'Inter', sans-serif;
+      color: var(--navy); background: white; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s; appearance: none;
+    }
+    .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238896b3' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+    .field input:focus, .field select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,92,255,0.12); }
+    .field input.invalid, .field select.invalid { border-color: var(--error); }
+    .field input[readonly] { background: #f8f9fb; color: var(--grey); cursor: not-allowed; }
+    .field-error { font-size: 12px; color: var(--error); margin-top: 4px; display: none; font-weight: 500; }
+    .field-error.show { display: block; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    /* Address typeahead */
+    .addr-wrap { position: relative; }
+    .address-dropdown {
+      background: white; border: 2px solid var(--blue);
+      border-radius: 10px; margin-top: 4px; display: none;
+      max-height: 240px; overflow-y: auto;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 50;
+    }
+    .address-dropdown.open { display: block; }
+    .addr-option { padding: 10px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid var(--grey-light); color: var(--navy); transition: background 0.15s; }
+    .addr-option:last-child { border-bottom: none; }
+    .addr-option:hover { background: #f0f5ff; }
+    .addr-option.addr-hint { color: var(--grey); cursor: default; font-style: italic; }
+    .addr-option.addr-hint:hover { background: none; }
+
+    /* Radio / VAT */
+    .radio-group { display: flex; gap: 10px; }
+    .radio-btn { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border: 2px solid var(--grey-light); border-radius: 10px; background: white; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--navy); transition: all 0.2s; font-family: 'Inter', sans-serif; }
+    .radio-btn:hover { border-color: var(--blue); background: #f0f5ff; }
+    .radio-btn.selected { border-color: var(--blue); background: #edf2ff; }
+
+    /* Director card (shown when a director is selected) */
+    .director-card {
+      background: #f0fff4; border: 1.5px solid #bbf7d0;
+      border-radius: 10px; padding: 14px 16px; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .director-card-icon { font-size: 24px; }
+    .director-card-name { font-size: 15px; font-weight: 700; color: #166534; }
+    .director-card-meta { font-size: 12px; color: #4ade80; }
+
+    /* DOB partial inputs */
+    .dob-partial-row { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; }
+
+    /* Buttons */
+    .cta-btn {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, var(--blue) 0%, #0040dd 100%);
+      color: white; border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 800; font-family: 'Inter', sans-serif;
+      cursor: pointer; transition: all 0.2s; margin-top: 16px;
+      letter-spacing: 0.01em; position: relative; overflow: hidden;
+    }
+    .cta-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%); }
+    .cta-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(26,92,255,0.4); }
+    .cta-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .trust-line { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 12px; font-size: 12px; color: var(--grey); }
+
+    /* Loading overlay */
+    .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+    .loading-overlay.show { display: flex; }
+    .spinner { width: 40px; height: 40px; border: 4px solid var(--grey-light); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 900px) {
+      .page { grid-template-columns: 1fr; }
+      .left { position: static; height: auto; padding: 28px 24px 24px; }
+      .right { padding: 32px 20px 48px; }
+      .field-row, .dob-partial-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="loading-overlay" id="loading-overlay">
+    <div class="spinner"></div>
+    <p style="font-size:14px;color:#3a4a68;font-weight:600;">Saving your details…</p>
+  </div>
+
+  <div class="page">
+
+    <!-- ═══ LEFT ═══ -->
+    <div class="left">
+      <div class="logo-wrap">
+        <img class="logo" src="https://avantisdirect.com/wp-content/uploads/2025/04/pixel-free-logo.png"
+          alt="Avantis Direct" onerror="this.parentElement.style.display='none'">
+      </div>
+      <div class="badge-pill">🔓 Card Machine Pre-Approved</div>
+      <h1>Fast-track onboarding for <span class="hi" id="name-display">your business</span></h1>
+      <p class="left-sub">We only need a few more details to get your card terminal on the way.</p>
+      <div class="progress-steps">
+        <div class="ps-item done"><div class="ps-dot">✓</div> Quick check &amp; contact details</div>
+        <div class="ps-item active"><div class="ps-dot">2</div> Business details</div>
+        <div class="ps-item"><div class="ps-dot">3</div> Upload documents</div>
+      </div>
+      <div class="reviews-strip">
+        <div class="stars">★★★★★</div>
+        <div class="review-text">"Saleem was very helpful since day one — found me the best deal for my business. Would highly recommend!"</div>
+        <div class="review-author">— Zaheer Mohammed, Merchant</div>
+      </div>
+    </div>
+
+    <!-- ═══ RIGHT ═══ -->
+    <div class="right">
+      <div class="form-wrap">
+
+        <div class="page-header">
+          <h2>Business Details</h2>
+          <p>Tell us about your company so we can set up your account.</p>
+        </div>
+
+        <!-- Companies House loading banner -->
+        <div class="ch-banner" id="ch-banner" style="display:none">
+          <div class="mini-spin"></div>
+          <span id="ch-banner-text">Loading company data from Companies House…</span>
+        </div>
+
+        <form id="p2-form" novalidate>
+
+          <!-- ── COMPANY INFORMATION ── -->
+          <div class="section-title">Company Information</div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Company Name <span class="req">*</span></label>
+              <input type="text" id="p2-company-name" placeholder="Registered company name" required>
+              <div class="field-error" id="err-company-name">Required</div>
+            </div>
+            <div class="field">
+              <label>Trading Name <span class="req">*</span></label>
+              <input type="text" id="p2-trading-name" placeholder="Name customers know you by" required>
+              <div class="field-error" id="err-trading-name">Required</div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Company Number</label>
+              <input type="text" id="p2-company-number" placeholder="e.g. 12345678">
+            </div>
+            <div class="field">
+              <label>Type of Business <span class="req">*</span></label>
+              <input type="text" id="p2-biz-type" placeholder="e.g. Restaurant, Retail, Salon" required>
+              <div class="field-error" id="err-biz-type">Required</div>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>How Long Trading? <span class="req">*</span></label>
+              <select id="p2-trading-length" required>
+                <option value="">Select…</option>
+                <option value="Less Than 1 Year">Less Than 1 Year</option>
+                <option value="1 - 2 Years">1 – 2 Years</option>
+                <option value="3 - 4 Years">3 – 4 Years</option>
+                <option value="5+ Years">5+ Years</option>
+              </select>
+              <div class="field-error" id="err-trading-length">Required</div>
+            </div>
+            <div class="field">
+              <label>Are You VAT Registered? <span class="req">*</span></label>
+              <div class="radio-group" id="vat-group">
+                <button type="button" class="radio-btn" data-val="true"  onclick="selectVat(this)">✅ Yes</button>
+                <button type="button" class="radio-btn" data-val="false" onclick="selectVat(this)">❌ No</button>
+              </div>
+              <div class="field-error" id="err-vat">Required</div>
+            </div>
+          </div>
+
+          <div class="field" id="vat-number-wrap" style="display:none">
+            <label>VAT Number</label>
+            <input type="text" id="p2-vat-number" placeholder="e.g. GB123456789">
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Website</label>
+              <input type="url" id="p2-website" placeholder="https://yoursite.co.uk">
+            </div>
+            <div class="field">
+              <label>Email <span class="req">*</span></label>
+              <input type="email" id="p2-email" placeholder="you@business.co.uk" required>
+              <div class="field-error" id="err-email">Valid email required</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Phone Number <span class="req">*</span></label>
+            <input type="tel" id="p2-phone" placeholder="07700 900000" required>
+            <div class="field-error" id="err-phone">Valid UK number required</div>
+          </div>
+
+          <!-- ── TRADING ADDRESS ── -->
+          <div class="section-title">Trading Address</div>
+
+          <div class="field">
+            <label>Search Address</label>
+            <div class="addr-wrap">
+              <input type="text" id="p2-trade-search" placeholder="Type a postcode or start of address…"
+                autocomplete="off"
+                oninput="addrTypeahead(this,'trade-dd','p2-trade-addr1','p2-trade-postcode','p2-trade-city','p2-trade-county')">
+              <div class="address-dropdown" id="trade-dd"></div>
+            </div>
+            <p class="field-hint">Select from the list, or fill in the fields below manually</p>
+          </div>
+
+          <div class="field">
+            <label>Address Line 1 <span class="req">*</span></label>
+            <input type="text" id="p2-trade-addr1" placeholder="House number / street" required>
+            <div class="field-error" id="err-trade-addr1">Required</div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Postcode <span class="req">*</span></label>
+              <input type="text" id="p2-trade-postcode" placeholder="SW1A 1AA" required
+                oninput="this.value=this.value.toUpperCase()">
+              <div class="field-error" id="err-trade-postcode">Required</div>
+            </div>
+            <div class="field">
+              <label>City / Town <span class="req">*</span></label>
+              <input type="text" id="p2-trade-city" placeholder="London" required>
+              <div class="field-error" id="err-trade-city">Required</div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>County / Region</label>
+            <input type="text" id="p2-trade-county" placeholder="Greater London">
+          </div>
+
+          <!-- ── DIRECTOR / PROPRIETOR ── -->
+          <div class="section-title">Director / Proprietor Details</div>
+
+          <!-- Dropdown of CH directors (hidden if no company) -->
+          <div class="field" id="director-select-field">
+            <label>Select Director <span class="req">*</span></label>
+            <select id="p2-director-select" onchange="onDirectorSelect(this.value)">
+              <option value="">Choose a director…</option>
+              <option value="__manual">+ Enter details manually</option>
+            </select>
+            <div class="field-error" id="err-director-select">Please select a director</div>
+          </div>
+
+          <!-- Director details (shown after selection) -->
+          <div id="director-details" style="display:none">
+
+            <div class="field">
+              <label>Full Name <span class="req">*</span></label>
+              <input type="text" id="p2-director-name" placeholder="Director's full name">
+              <div class="field-error" id="err-director-name">Required</div>
+            </div>
+
+            <!-- DOB: day only when CH provides month + year -->
+            <div class="dob-partial-row" id="dob-partial-row" style="display:none">
+              <div class="field">
+                <label>Day of Birth <span class="req">*</span></label>
+                <input type="number" id="p2-dob-day" min="1" max="31" placeholder="e.g. 15">
+                <div class="field-error" id="err-dob-day">Enter a valid day (1–31)</div>
+              </div>
+              <div class="field">
+                <label>Month &amp; Year <small style="font-weight:400;text-transform:none;letter-spacing:0">(from Companies House)</small></label>
+                <input type="text" id="p2-dob-monthyear" readonly placeholder="—">
+              </div>
+            </div>
+
+            <!-- DOB: full date picker when manual -->
+            <div class="field" id="dob-full-field" style="display:none">
+              <label>Date of Birth <span class="req">*</span></label>
+              <input type="date" id="p2-dob">
+              <div class="field-error" id="err-dob">Required</div>
+            </div>
+
+            <!-- Director home address -->
+            <div class="field">
+              <label>Search Home Address</label>
+              <div class="addr-wrap">
+                <input type="text" id="p2-dir-search" placeholder="Type a postcode or start of address…"
+                  autocomplete="off"
+                  oninput="addrTypeahead(this,'dir-dd','p2-dir-addr1','p2-dir-postcode','p2-dir-city','p2-dir-county')">
+                <div class="address-dropdown" id="dir-dd"></div>
+              </div>
+              <p class="field-hint">Select from the list, or fill in the fields below manually</p>
+            </div>
+
+            <div class="field">
+              <label>Home Address Line 1 <span class="req">*</span></label>
+              <input type="text" id="p2-dir-addr1" placeholder="House number / street">
+              <div class="field-error" id="err-dir-addr1">Required</div>
+            </div>
+
+            <div class="field-row">
+              <div class="field">
+                <label>Postcode <span class="req">*</span></label>
+                <input type="text" id="p2-dir-postcode" placeholder="SW1A 1AA"
+                  oninput="this.value=this.value.toUpperCase()">
+                <div class="field-error" id="err-dir-postcode">Required</div>
+              </div>
+              <div class="field">
+                <label>City / Town <span class="req">*</span></label>
+                <input type="text" id="p2-dir-city" placeholder="London">
+                <div class="field-error" id="err-dir-city">Required</div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>County / Region</label>
+              <input type="text" id="p2-dir-county" placeholder="Greater London">
+            </div>
+
+          </div>
+          <!-- /director-details -->
+
+          <button type="submit" class="cta-btn" id="p2-submit-btn">
+            Save &amp; Continue to Documents →
+          </button>
+          <div class="trust-line">🔒 Your information is encrypted and secure</div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const params   = new URLSearchParams(window.location.search);
+    const recordId = params.get('id') || null;
+
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+    let vatValue          = null;
+    let chDirectors       = [];      // active directors from CH
+    let selectedDobPartial = null;  // { month, year } from CH
+    let directorSelectHidden = false;
+
+    // ── helpers ──
+    function setVal(id, val) { const el = document.getElementById(id); if (el && val) el.value = val; }
+
+    // ── Step 1: fetch Airtable record ──
+    async function prefillFromRecord() {
+      if (!recordId) {
+        initDirectorSection([]);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/airtable-get?id=${encodeURIComponent(recordId)}`);
+        if (!res.ok) { initDirectorSection([]); return; }
+        const { fields } = await res.json();
+
+        if (fields['First_Name']) {
+          document.getElementById('name-display').textContent = fields['First_Name'] + "'s business";
+        }
+        setVal('p2-company-name',   fields['Company Name']   || '');
+        setVal('p2-trading-name',   fields['Company Name']   || '');
+        setVal('p2-company-number', fields['Company Number'] || '');
+        setVal('p2-email',          fields['Email']          || '');
+        setVal('p2-phone',          fields['Phone']          || '');
+
+        const num = fields['Company Number'];
+        if (num) {
+          await fetchCompanyDetails(num);
+        } else {
+          initDirectorSection([]);
+        }
+      } catch (e) {
+        console.warn('Prefill error:', e);
+        initDirectorSection([]);
+      }
+    }
+
+    // ── Step 2: fetch CH data ──
+    async function fetchCompanyDetails(number) {
+      const banner = document.getElementById('ch-banner');
+      banner.style.display = 'flex';
+
+      try {
+        const res  = await fetch(`/api/company-details?number=${encodeURIComponent(number)}`);
+        const data = await res.json();
+        onCompanyDetailsLoaded(data);
+
+        document.getElementById('ch-banner-text').textContent = '✓ Company data loaded from Companies House';
+        banner.classList.add('success');
+        setTimeout(() => { banner.style.display = 'none'; }, 3000);
+      } catch (e) {
+        console.warn('CH fetch error:', e);
+        banner.style.display = 'none';
+        initDirectorSection([]);
+      }
+    }
+
+    // ── Step 3: populate form from CH data ──
+    function onCompanyDetailsLoaded({ company, directors }) {
+      // Trading address from registered office
+      if (company?.address) {
+        const a = company.address;
+        const line1 = [a.premises, a.address_line_1, a.address_line_2].filter(Boolean).join(', ');
+        if (line1) setVal('p2-trade-addr1',    line1);
+        if (a.postal_code) setVal('p2-trade-postcode', a.postal_code);
+        if (a.locality)    setVal('p2-trade-city',     a.locality);
+        if (a.region)      setVal('p2-trade-county',   a.region);
+      }
+
+      // Trading length from incorporation date
+      if (company?.incorporatedOn) {
+        const years = (Date.now() - new Date(company.incorporatedOn).getTime()) / (365.25 * 24 * 3600 * 1000);
+        let tl = '';
+        if      (years < 1)  tl = 'Less Than 1 Year';
+        else if (years < 3)  tl = '1 - 2 Years';
+        else if (years < 5)  tl = '3 - 4 Years';
+        else                 tl = '5+ Years';
+        const sel = document.getElementById('p2-trading-length');
+        if (sel) sel.value = tl;
+      }
+
+      initDirectorSection(directors || []);
+    }
+
+    // ── Director dropdown init ──
+    function initDirectorSection(directors) {
+      chDirectors = directors;
+      const sel   = document.getElementById('p2-director-select');
+
+      if (!directors.length) {
+        // No CH directors — hide the dropdown, go straight to manual
+        document.getElementById('director-select-field').style.display = 'none';
+        directorSelectHidden = true;
+        onDirectorSelect('__manual');
+        return;
+      }
+
+      // Rebuild options
+      sel.innerHTML = '<option value="">Select a director…</option>';
+      directors.forEach((d, i) => {
+        const dobStr = d.dob ? ` · ${MONTHS[d.dob.month - 1]} ${d.dob.year}` : '';
+        sel.add(new Option(`${d.name}${dobStr}`, String(i)));
+      });
+      sel.add(new Option('➕ Enter details manually', '__manual'));
+    }
+
+    // ── Director selected ──
+    function onDirectorSelect(value) {
+      const details    = document.getElementById('director-details');
+      const errSel     = document.getElementById('err-director-select');
+      const selEl      = document.getElementById('p2-director-select');
+
+      if (selEl) { selEl.classList.remove('invalid'); errSel.classList.remove('show'); }
+
+      if (!value) {
+        details.style.display = 'none';
+        return;
+      }
+
+      details.style.display = 'block';
+
+      if (value === '__manual') {
+        document.getElementById('p2-director-name').readOnly = false;
+        document.getElementById('p2-director-name').value    = '';
+        selectedDobPartial = null;
+        document.getElementById('dob-partial-row').style.display = 'none';
+        document.getElementById('dob-full-field').style.display  = 'block';
+        return;
+      }
+
+      const idx      = parseInt(value, 10);
+      const director = chDirectors[idx];
+      if (!director) return;
+
+      document.getElementById('p2-director-name').value    = director.name;
+      document.getElementById('p2-director-name').readOnly = true;
+
+      if (director.dob) {
+        selectedDobPartial = director.dob;
+        document.getElementById('p2-dob-monthyear').value          = `${MONTHS[director.dob.month - 1]} ${director.dob.year}`;
+        document.getElementById('dob-partial-row').style.display   = 'grid';
+        document.getElementById('dob-full-field').style.display    = 'none';
+        document.getElementById('p2-dob-day').value = '';
+      } else {
+        selectedDobPartial = null;
+        document.getElementById('dob-partial-row').style.display = 'none';
+        document.getElementById('dob-full-field').style.display  = 'block';
+      }
+    }
+
+    // ── VAT toggle ──
+    function selectVat(btn) {
+      document.querySelectorAll('#vat-group .radio-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      vatValue = btn.dataset.val === 'true';
+      document.getElementById('vat-number-wrap').style.display = vatValue ? 'block' : 'none';
+      document.getElementById('err-vat').classList.remove('show');
+    }
+
+    // ── Address typeahead ──
+    const addrTimers = {};
+
+    function addrTypeahead(input, dropdownId, addr1Id, postcodeId, cityId, countyId) {
+      const q        = input.value.trim();
+      const dropdown = document.getElementById(dropdownId);
+      clearTimeout(addrTimers[dropdownId]);
+
+      if (q.length < 3) { dropdown.classList.remove('open'); return; }
+
+      addrTimers[dropdownId] = setTimeout(async () => {
+        dropdown.innerHTML = '<div class="addr-option addr-hint">Searching…</div>';
+        dropdown.classList.add('open');
+
+        try {
+          const res  = await fetch(`/api/address-lookup?q=${encodeURIComponent(q)}`);
+          const data = await res.json();
+          const list = data.addresses || [];
+
+          if (!list.length) {
+            dropdown.innerHTML = '<div class="addr-option addr-hint">No addresses found — enter details below</div>';
+            return;
+          }
+
+          if (data.fallback) {
+            // postcodes.io fallback: just fill city/county silently
+            const a = list[0];
+            if (a.city)   { const el = document.getElementById(cityId);   if (el && !el.value) el.value = a.city; }
+            if (a.county) { const el = document.getElementById(countyId); if (el && !el.value) el.value = a.county; }
+            if (a.postcode) { const el = document.getElementById(postcodeId); if (el && !el.value) el.value = a.postcode; }
+            dropdown.classList.remove('open');
+            return;
+          }
+
+          dropdown.innerHTML = list.map((a, i) => {
+            const label = [a.line1, a.postcode, a.city].filter(Boolean).join(', ');
+            return `<div class="addr-option" data-idx="${i}">${label}</div>`;
+          }).join('');
+
+          dropdown.onclick = (e) => {
+            const opt = e.target.closest('[data-idx]');
+            if (!opt) return;
+            const a = list[parseInt(opt.dataset.idx, 10)];
+            if (a.line1)    setVal(addr1Id,    a.line1);
+            if (a.postcode) setVal(postcodeId, a.postcode);
+            if (a.city)     setVal(cityId,     a.city);
+            if (a.county)   setVal(countyId,   a.county);
+            input.value = [a.line1, a.postcode].filter(Boolean).join(', ');
+            dropdown.classList.remove('open');
+            dropdown.onclick = null;
+          };
+        } catch {
+          dropdown.classList.remove('open');
+        }
+      }, 350);
+    }
+
+    // Close dropdowns on outside click
+    document.addEventListener('click', (e) => {
+      ['trade-dd','dir-dd'].forEach(id => {
+        const dd = document.getElementById(id);
+        if (dd && !dd.contains(e.target) && !e.target.closest('.addr-wrap')) {
+          dd.classList.remove('open');
+        }
+      });
+    });
+
+    // ── DOB helpers ──
+    function getDobValue() {
+      if (selectedDobPartial) {
+        const day = parseInt(document.getElementById('p2-dob-day').value, 10);
+        if (!day || day < 1 || day > 31) return null;
+        const { month, year } = selectedDobPartial;
+        return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      }
+      return document.getElementById('p2-dob').value || null;
+    }
+
+    function validateDob() {
+      if (selectedDobPartial) {
+        const day = parseInt(document.getElementById('p2-dob-day').value, 10);
+        const ok  = day >= 1 && day <= 31;
+        document.getElementById('p2-dob-day').classList.toggle('invalid', !ok);
+        document.getElementById('err-dob-day').classList.toggle('show',   !ok);
+        return ok;
+      }
+      const dobField = document.getElementById('dob-full-field');
+      if (dobField.style.display === 'none') return true; // not shown = not required
+      const ok = !!document.getElementById('p2-dob').value;
+      document.getElementById('p2-dob').classList.toggle('invalid', !ok);
+      document.getElementById('err-dob').classList.toggle('show',   !ok);
+      return ok;
+    }
+
+    // ── Validation helpers ──
+    function req(id, errId) {
+      const el  = document.getElementById(id);
+      const err = document.getElementById(errId);
+      if (!el) return true;
+      const ok = el.value.trim().length > 0;
+      el.classList.toggle('invalid', !ok);
+      if (err) err.classList.toggle('show', !ok);
+      return ok;
+    }
+
+    function validateEmail() {
+      const v  = document.getElementById('p2-email').value.trim();
+      const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+      document.getElementById('p2-email').classList.toggle('invalid', !ok);
+      document.getElementById('err-email').classList.toggle('show',   !ok);
+      return ok;
+    }
+
+    function validatePhone() {
+      const raw = document.getElementById('p2-phone').value.replace(/\s/g, '');
+      const ok  = /^(07\d{9}|\+447\d{9})$/.test(raw);
+      document.getElementById('p2-phone').classList.toggle('invalid', !ok);
+      document.getElementById('err-phone').classList.toggle('show',   !ok);
+      return ok;
+    }
+
+    function validateDirectorSection() {
+      let ok = true;
+
+      // Validate dropdown only if it's visible
+      if (!directorSelectHidden) {
+        const selectVal = document.getElementById('p2-director-select').value;
+        if (!selectVal) {
+          document.getElementById('p2-director-select').classList.add('invalid');
+          document.getElementById('err-director-select').classList.add('show');
+          ok = false;
+        }
+      }
+
+      // If director-details is visible, validate its fields
+      const details = document.getElementById('director-details');
+      if (details.style.display !== 'none') {
+        if (!req('p2-director-name', 'err-director-name')) ok = false;
+        if (!validateDob())                                ok = false;
+        if (!req('p2-dir-addr1',    'err-dir-addr1'))      ok = false;
+        if (!req('p2-dir-postcode', 'err-dir-postcode'))   ok = false;
+        if (!req('p2-dir-city',     'err-dir-city'))       ok = false;
+      }
+
+      return ok;
+    }
+
+    // ── Submit ──
+    document.getElementById('p2-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const baseOk = [
+        req('p2-company-name',   'err-company-name'),
+        req('p2-trading-name',   'err-trading-name'),
+        req('p2-biz-type',       'err-biz-type'),
+        req('p2-trading-length', 'err-trading-length'),
+        req('p2-trade-addr1',    'err-trade-addr1'),
+        req('p2-trade-postcode', 'err-trade-postcode'),
+        req('p2-trade-city',     'err-trade-city'),
+        validateEmail(),
+        validatePhone(),
+      ].every(Boolean);
+
+      if (vatValue === null) {
+        document.getElementById('err-vat').classList.add('show');
+      }
+
+      const dirOk = validateDirectorSection();
+
+      if (!baseOk || vatValue === null || !dirOk) {
+        document.querySelector('.invalid')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      document.getElementById('loading-overlay').classList.add('show');
+
+      const dob = getDobValue();
+
+      const fields = {
+        'Company Name':            document.getElementById('p2-company-name').value.trim(),
+        'Trading Name':            document.getElementById('p2-trading-name').value.trim(),
+        'Company Number':          document.getElementById('p2-company-number').value.trim() || undefined,
+        'Type of business':        document.getElementById('p2-biz-type').value.trim(),
+        'How long have you been trading for?': document.getElementById('p2-trading-length').value,
+        'Are you VAT registered?': vatValue,
+        'VAT Number':              vatValue ? (document.getElementById('p2-vat-number').value.trim() || undefined) : undefined,
+        'Email':                   document.getElementById('p2-email').value.trim(),
+        'Phone':                   document.getElementById('p2-phone').value.trim(),
+        'Website':                 document.getElementById('p2-website').value.trim() || undefined,
+        'Address (Trading address)':             document.getElementById('p2-trade-addr1').value.trim(),
+        'Zip/Postal code (Trading address)':     document.getElementById('p2-trade-postcode').value.trim(),
+        'City (Trading address)':                document.getElementById('p2-trade-city').value.trim(),
+        'State/Province (Trading address)':      document.getElementById('p2-trade-county').value.trim() || undefined,
+        'Country (Trading address)':             'United Kingdom',
+        "Director's / Proprietor Full Name":     document.getElementById('p2-director-name').value.trim(),
+        "Director's / Proprietor Date of Birth": dob || undefined,
+        'Address (Director\'s / Proprietor Address)':          document.getElementById('p2-dir-addr1').value.trim()    || undefined,
+        'Zip/Postal code (Director\'s / Proprietor Address)': document.getElementById('p2-dir-postcode').value.trim() || undefined,
+        'City (Director\'s / Proprietor Address)':            document.getElementById('p2-dir-city').value.trim()     || undefined,
+        'State/Province (Director\'s / Proprietor Address)':  document.getElementById('p2-dir-county').value.trim()   || undefined,
+        'Country (Director\'s / Proprietor Address)':         'United Kingdom',
+        'Status': "Director's Details Added",
+      };
+      Object.keys(fields).forEach(k => fields[k] === undefined && delete fields[k]);
+
+      try {
+        let res;
+        if (recordId) {
+          res = await fetch('/api/airtable-update', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recordId, fields })
+          });
+        } else {
+          res = await fetch('/api/airtable-create', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fields })
+          });
+        }
+        const data = await res.json();
+        const id   = recordId || data.id;
+        window.location.href = '/page3?id=' + encodeURIComponent(id);
+      } catch (err) {
+        console.error('Submit error:', err);
+        document.getElementById('loading-overlay').classList.remove('show');
+        alert('Something went wrong. Please try again.');
+      }
+    });
+
+    // Kick off prefill
+    prefillFromRecord();
+  </script>
+
+</body>
+</html>

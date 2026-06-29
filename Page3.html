@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avantis Direct – Upload Documents</title>
+  <link rel="icon" href="https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://avantisdirect.com&size=256">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #0a1628; --blue: #1a5cff; --cyan: #00d4ff;
+      --green: #00e676; --green-dark: #00c853;
+      --white: #ffffff; --off-white: #f0f4ff;
+      --grey: #8896b3; --grey-light: #dde3f0;
+      --error: #ff4757; --gold: #ffc107;
+    }
+
+    html, body { min-height: 100vh; font-family: 'Inter', sans-serif; background: var(--navy); color: var(--white); }
+
+    .page { min-height: 100vh; display: grid; grid-template-columns: 380px 1fr; }
+
+    /* ── LEFT ── */
+    .left {
+      background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 60%, #071020 100%);
+      padding: 40px 40px;
+      display: flex; flex-direction: column;
+      position: sticky; top: 0; height: 100vh; overflow: hidden;
+    }
+
+    .logo-wrap { display: inline-flex; align-items: center; background: #fff; border-radius: 10px; padding: 8px 14px; margin-bottom: 32px; width: fit-content; }
+    .logo { height: 32px; object-fit: contain; display: block; }
+
+    .badge-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(0,212,255,0.12); border: 1px solid rgba(0,212,255,0.3);
+      border-radius: 100px; padding: 8px 16px; margin-bottom: 24px; width: fit-content;
+      font-size: 13px; font-weight: 700; color: var(--cyan);
+    }
+
+    .left h1 { font-size: clamp(22px, 2.5vw, 30px); font-weight: 900; line-height: 1.2; margin-bottom: 14px; letter-spacing: -0.02em; }
+    .left-sub { font-size: 14px; color: #a8b8d8; line-height: 1.6; margin-bottom: 28px; }
+
+    .doc-checklist { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .doc-item {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: #a8b8d8; font-weight: 500;
+    }
+    .doc-item .doc-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .doc-item.uploaded { color: var(--green-dark); }
+
+    .progress-steps { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .ps-item { display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 600; color: #a8b8d8; }
+    .ps-item.done { color: var(--green-dark); }
+    .ps-item.active { color: var(--white); }
+    .ps-dot { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; border: 2px solid currentColor; }
+    .ps-item.done .ps-dot { background: var(--green-dark); border-color: var(--green-dark); color: white; }
+    .ps-item.active .ps-dot { background: var(--blue); border-color: var(--blue); color: white; }
+
+    .reviews-strip { margin-top: auto; padding: 18px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; backdrop-filter: blur(8px); }
+    .stars { color: var(--gold); font-size: 16px; letter-spacing: 2px; margin-bottom: 6px; }
+    .review-text { font-size: 12px; color: #a8b8d8; font-style: italic; line-height: 1.5; margin-bottom: 6px; }
+    .review-author { font-size: 11px; font-weight: 600; color: var(--grey); text-transform: uppercase; letter-spacing: 0.08em; }
+
+    /* ── RIGHT ── */
+    .right { background: var(--off-white); padding: 48px 48px 64px; overflow-y: auto; }
+    .form-wrap { max-width: 580px; }
+
+    .page-header { margin-bottom: 32px; }
+    .page-header h2 { font-size: 26px; font-weight: 900; color: var(--navy); letter-spacing: -0.02em; margin-bottom: 6px; }
+    .page-header p { font-size: 15px; color: #5a6a88; line-height: 1.5; }
+
+    .upload-card {
+      background: white; border: 2px solid var(--grey-light); border-radius: 14px;
+      padding: 20px 22px; margin-bottom: 16px; transition: border-color 0.2s;
+    }
+    .upload-card.has-file { border-color: var(--green-dark); }
+    .upload-card.has-error { border-color: var(--error); }
+
+    .upload-label { font-size: 13px; font-weight: 700; color: #3a4a68; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+    .upload-label .req { color: var(--error); }
+    .upload-hint { font-size: 12px; color: var(--grey); line-height: 1.4; margin-bottom: 12px; }
+
+    .file-drop {
+      border: 2px dashed var(--grey-light); border-radius: 10px;
+      padding: 20px; text-align: center; cursor: pointer;
+      transition: all 0.2s; position: relative;
+    }
+    .file-drop:hover, .file-drop.drag-over { border-color: var(--blue); background: #f0f5ff; }
+    .file-drop input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+    .file-drop-icon { font-size: 28px; margin-bottom: 6px; }
+    .file-drop-text { font-size: 13px; color: var(--grey); font-weight: 500; }
+    .file-drop-text strong { color: var(--blue); }
+
+    .file-preview {
+      display: none; align-items: center; gap: 10px; margin-top: 10px;
+      padding: 10px 12px; background: #f0fff4; border: 1px solid #bbf7d0; border-radius: 8px;
+    }
+    .file-preview.show { display: flex; }
+    .file-preview-name { flex: 1; font-size: 13px; font-weight: 600; color: #166534; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-preview-size { font-size: 11px; color: #166534; flex-shrink: 0; }
+    .file-remove { background: none; border: none; color: #dc2626; cursor: pointer; font-size: 16px; flex-shrink: 0; padding: 0 4px; }
+
+    .upload-progress { display: none; margin-top: 10px; }
+    .upload-progress.show { display: block; }
+    .progress-bar { height: 4px; background: var(--grey-light); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--blue); border-radius: 4px; transition: width 0.3s; width: 0%; }
+    .upload-status { font-size: 12px; color: var(--grey); margin-top: 4px; }
+    .upload-status.success { color: var(--green-dark); font-weight: 600; }
+    .upload-status.error { color: var(--error); }
+
+    .field-error-msg { font-size: 12px; color: var(--error); margin-top: 6px; display: none; font-weight: 500; }
+    .field-error-msg.show { display: block; }
+
+    .cta-btn {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, var(--green-dark) 0%, #009624 100%);
+      color: white; border: none; border-radius: 12px;
+      font-size: 16px; font-weight: 800; font-family: 'Inter', sans-serif;
+      cursor: pointer; transition: all 0.2s; margin-top: 16px;
+      letter-spacing: 0.01em; position: relative; overflow: hidden;
+    }
+    .cta-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%); }
+    .cta-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,200,83,0.4); }
+    .cta-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .trust-line { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 12px; font-size: 12px; color: var(--grey); }
+
+    /* Success */
+    .success-screen { display: none; text-align: center; padding: 40px 20px; }
+    .success-screen.show { display: block; }
+    .success-icon { width: 80px; height: 80px; background: linear-gradient(135deg, var(--green), var(--green-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto 24px; animation: popIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275); }
+    @keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .success-title { font-size: 28px; font-weight: 900; color: var(--navy); margin-bottom: 12px; }
+    .success-body { font-size: 15px; color: #5a6a88; line-height: 1.7; max-width: 400px; margin: 0 auto; }
+
+    @media (max-width: 900px) {
+      .page { grid-template-columns: 1fr; }
+      .left { position: static; height: auto; padding: 28px 24px 24px; }
+      .right { padding: 32px 20px 48px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+
+    <!-- ═══ LEFT ═══ -->
+    <div class="left">
+      <div class="logo-wrap">
+        <img class="logo" src="https://avantisdirect.com/wp-content/uploads/2025/04/pixel-free-logo.png"
+          alt="Avantis Direct" onerror="this.parentElement.style.display='none'">
+      </div>
+
+      <div class="badge-pill">📄 Final Step</div>
+
+      <h1>Upload your business documents</h1>
+      <p class="left-sub" id="left-sub">Add your documents below to receive your card terminal in 2–7 working days.</p>
+
+      <div class="progress-steps">
+        <div class="ps-item done"><div class="ps-dot">✓</div> Quick check &amp; contact details</div>
+        <div class="ps-item done"><div class="ps-dot">✓</div> Business details</div>
+        <div class="ps-item active"><div class="ps-dot">3</div> Upload documents</div>
+      </div>
+
+      <div class="reviews-strip">
+        <div class="stars">★★★★★</div>
+        <div class="review-text">"As a young and inexperienced business owner, they helped me massively. Made the entire experience as smooth and simple as possible."</div>
+        <div class="review-author">— Ibraheem Khan, Business Owner</div>
+      </div>
+    </div>
+
+    <!-- ═══ RIGHT ═══ -->
+    <div class="right">
+      <div class="form-wrap">
+
+        <div class="success-screen" id="success-screen">
+          <div class="success-icon">✓</div>
+          <div class="success-title">All done! 🎉</div>
+          <div class="success-body">
+            Your documents have been submitted. Our team will review everything and be in touch within
+            <strong>2 working days</strong> to confirm your card terminal is on its way.
+          </div>
+        </div>
+
+        <div id="upload-form">
+          <div class="page-header">
+            <h2>Business Documents</h2>
+            <p>Please upload clear, readable copies. JPG, PNG or PDF accepted. Max 10MB per file.</p>
+          </div>
+
+          <!-- PASSPORT -->
+          <div class="upload-card" id="card-passport">
+            <div class="upload-label">🪪 Passport or Full Driving Licence <span class="req">*</span></div>
+            <div class="upload-hint">Please ensure all four corners are visible in the image.</div>
+            <div class="file-drop" id="drop-passport">
+              <input type="file" id="file-passport" accept="image/*,.pdf" onchange="handleFile('passport', this)">
+              <div class="file-drop-icon">📎</div>
+              <div class="file-drop-text">Drop file here or <strong>browse</strong></div>
+            </div>
+            <div class="file-preview" id="preview-passport">
+              <span class="file-preview-name" id="name-passport"></span>
+              <span class="file-preview-size" id="size-passport"></span>
+              <button class="file-remove" onclick="removeFile('passport')">✕</button>
+            </div>
+            <div class="upload-progress" id="progress-passport">
+              <div class="progress-bar"><div class="progress-fill" id="fill-passport"></div></div>
+              <div class="upload-status" id="status-passport">Uploading…</div>
+            </div>
+            <div class="field-error-msg" id="err-passport">This document is required</div>
+          </div>
+
+          <!-- UTILITY BILL -->
+          <div class="upload-card" id="card-utility">
+            <div class="upload-label">🏠 Director's Utility Bill <span class="req">*</span></div>
+            <div class="upload-hint">Must show your address and be dated within the last 3 months.</div>
+            <div class="file-drop" id="drop-utility">
+              <input type="file" id="file-utility" accept="image/*,.pdf" onchange="handleFile('utility', this)">
+              <div class="file-drop-icon">📎</div>
+              <div class="file-drop-text">Drop file here or <strong>browse</strong></div>
+            </div>
+            <div class="file-preview" id="preview-utility">
+              <span class="file-preview-name" id="name-utility"></span>
+              <span class="file-preview-size" id="size-utility"></span>
+              <button class="file-remove" onclick="removeFile('utility')">✕</button>
+            </div>
+            <div class="upload-progress" id="progress-utility">
+              <div class="progress-bar"><div class="progress-fill" id="fill-utility"></div></div>
+              <div class="upload-status" id="status-utility">Uploading…</div>
+            </div>
+            <div class="field-error-msg" id="err-utility">This document is required</div>
+          </div>
+
+          <!-- BANK STATEMENT -->
+          <div class="upload-card" id="card-bank">
+            <div class="upload-label">🏦 Business Bank Statement <span class="req">*</span></div>
+            <div class="upload-hint">Must be dated within the last 3 months.</div>
+            <div class="file-drop" id="drop-bank">
+              <input type="file" id="file-bank" accept="image/*,.pdf" onchange="handleFile('bank', this)">
+              <div class="file-drop-icon">📎</div>
+              <div class="file-drop-text">Drop file here or <strong>browse</strong></div>
+            </div>
+            <div class="file-preview" id="preview-bank">
+              <span class="file-preview-name" id="name-bank"></span>
+              <span class="file-preview-size" id="size-bank"></span>
+              <button class="file-remove" onclick="removeFile('bank')">✕</button>
+            </div>
+            <div class="upload-progress" id="progress-bank">
+              <div class="progress-bar"><div class="progress-fill" id="fill-bank"></div></div>
+              <div class="upload-status" id="status-bank">Uploading…</div>
+            </div>
+            <div class="field-error-msg" id="err-bank">This document is required</div>
+          </div>
+
+          <!-- BUSINESS UTILITY BILL -->
+          <div class="upload-card" id="card-bizutil">
+            <div class="upload-label">📋 Business Utility Bill or Purchase Invoice <span class="req">*</span></div>
+            <div class="upload-hint">Any business utility bill or purchase invoice dated within the last 3 months.</div>
+            <div class="file-drop" id="drop-bizutil">
+              <input type="file" id="file-bizutil" accept="image/*,.pdf" onchange="handleFile('bizutil', this)">
+              <div class="file-drop-icon">📎</div>
+              <div class="file-drop-text">Drop file here or <strong>browse</strong></div>
+            </div>
+            <div class="file-preview" id="preview-bizutil">
+              <span class="file-preview-name" id="name-bizutil"></span>
+              <span class="file-preview-size" id="size-bizutil"></span>
+              <button class="file-remove" onclick="removeFile('bizutil')">✕</button>
+            </div>
+            <div class="upload-progress" id="progress-bizutil">
+              <div class="progress-bar"><div class="progress-fill" id="fill-bizutil"></div></div>
+              <div class="upload-status" id="status-bizutil">Uploading…</div>
+            </div>
+            <div class="field-error-msg" id="err-bizutil">This document is required</div>
+          </div>
+
+          <button class="cta-btn" id="submit-btn" onclick="submitDocuments()">
+            Submit My Documents ✓
+          </button>
+          <div class="trust-line">🔒 All documents are encrypted in transit and at rest</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const params   = new URLSearchParams(window.location.search);
+    const recordId = params.get('id') || null;
+
+    // Airtable field IDs for each document
+    const FIELD_IDS = {
+      passport: 'fldcu9aJhn6WMVn7s',
+      utility:  'fldb4Hjpl3TKRkkzw',
+      bank:     'fldMOBTerCSucZGDr',
+      bizutil:  'fldeiVSCan4BjieRu',
+    };
+
+    // Store selected files
+    const files = { passport: null, utility: null, bank: null, bizutil: null };
+
+    function formatSize(bytes) {
+      if (bytes < 1024)       return bytes + ' B';
+      if (bytes < 1024*1024)  return (bytes/1024).toFixed(1) + ' KB';
+      return (bytes/1024/1024).toFixed(1) + ' MB';
+    }
+
+    function handleFile(key, input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      if (file.size > 10 * 1024 * 1024) {
+        alert(`${file.name} is too large. Maximum file size is 10MB.`);
+        input.value = '';
+        return;
+      }
+
+      files[key] = file;
+
+      document.getElementById('name-' + key).textContent = file.name;
+      document.getElementById('size-' + key).textContent = formatSize(file.size);
+      document.getElementById('preview-' + key).classList.add('show');
+      document.getElementById('card-' + key).classList.add('has-file');
+      document.getElementById('err-' + key).classList.remove('show');
+      document.getElementById('progress-' + key).classList.remove('show');
+    }
+
+    function removeFile(key) {
+      files[key] = null;
+      document.getElementById('file-' + key).value = '';
+      document.getElementById('preview-' + key).classList.remove('show');
+      document.getElementById('card-' + key).classList.remove('has-file');
+      document.getElementById('progress-' + key).classList.remove('show');
+    }
+
+    // Drag-and-drop
+    document.querySelectorAll('.file-drop').forEach(drop => {
+      drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag-over'); });
+      drop.addEventListener('dragleave', () => drop.classList.remove('drag-over'));
+      drop.addEventListener('drop', e => {
+        e.preventDefault();
+        drop.classList.remove('drag-over');
+        const key = drop.id.replace('drop-', '');
+        const input = document.getElementById('file-' + key);
+        input.files = e.dataTransfer.files;
+        handleFile(key, input);
+      });
+    });
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload  = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function setProgress(key, pct, statusText, statusClass) {
+      const prog = document.getElementById('progress-' + key);
+      const fill = document.getElementById('fill-' + key);
+      const stat = document.getElementById('status-' + key);
+      prog.classList.add('show');
+      fill.style.width = pct + '%';
+      stat.textContent = statusText;
+      stat.className = 'upload-status' + (statusClass ? ' ' + statusClass : '');
+    }
+
+    async function uploadFile(key, file, recId) {
+      setProgress(key, 20, 'Preparing…');
+      const base64 = await fileToBase64(file);
+      setProgress(key, 50, 'Uploading…');
+
+      const res = await fetch('/api/upload-attachment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recordId:    recId,
+          fieldId:     FIELD_IDS[key],
+          filename:    file.name,
+          contentType: file.type || 'application/octet-stream',
+          fileBase64:  base64,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Upload failed (${res.status})`);
+      }
+
+      setProgress(key, 100, '✓ Uploaded', 'success');
+      return true;
+    }
+
+    async function submitDocuments() {
+      // Validate all required files are selected
+      let valid = true;
+      ['passport', 'utility', 'bank', 'bizutil'].forEach(key => {
+        if (!files[key]) {
+          document.getElementById('card-' + key).classList.add('has-error');
+          document.getElementById('err-' + key).classList.add('show');
+          valid = false;
+        }
+      });
+      if (!valid) return;
+
+      if (!recordId) {
+        alert('No application ID found. Please start from the beginning.');
+        return;
+      }
+
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Uploading documents…';
+
+      const keys = ['passport', 'utility', 'bank', 'bizutil'];
+      let allOk = true;
+
+      for (const key of keys) {
+        try {
+          await uploadFile(key, files[key], recordId);
+        } catch (err) {
+          console.error(key, err);
+          setProgress(key, 0, '✕ ' + err.message, 'error');
+          document.getElementById('card-' + key).classList.add('has-error');
+          allOk = false;
+        }
+      }
+
+      // Update Airtable status regardless of individual file success
+      try {
+        await fetch('/api/airtable-update', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ recordId, fields: { 'Status': 'Documents Submitted' } })
+        });
+      } catch (e) { console.warn('Status update error:', e); }
+
+      if (allOk) {
+        document.getElementById('upload-form').style.display = 'none';
+        document.getElementById('success-screen').classList.add('show');
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Retry Failed Uploads ↺';
+        // Remove successful uploads from the retry list
+        keys.forEach(k => {
+          const fill = document.getElementById('fill-' + k);
+          if (fill.style.width === '100%') files[k] = null;
+        });
+      }
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,416 @@
+"use client"
+
+import type React from "react"
+
+import { useState, useEffect, useCallback, useRef } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import {
+  Search,
+  Building2,
+  Calendar,
+  MapPin,
+  Hash,
+  Loader2,
+  CheckCircle,
+  ChevronDown,
+  ExternalLink,
+} from "lucide-react"
+import { useUTM } from "@/components/utm-provider"
+import { buildApplicationUrl } from "@/lib/utils"
+
+interface Company {
+  title: string
+  company_number: string
+  company_status: string
+  date_of_creation: string
+  address: {
+    address_line_1?: string
+    address_line_2?: string
+    locality?: string
+    postal_code?: string
+    country?: string
+    region?: string
+  }
+  address_snippet: string
+  description: string
+  company_type?: string
+  description_identifier?: string[]
+}
+
+export default function CompanySearch() {
+  const { utmParams, isPersonalized } = useUTM()
+  const [query, setQuery] = useState("")
+  const [companies, setCompanies] = useState<Company[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null)
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [highlightedIndex, setHighlightedIndex] = useState(-1)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  // Load previously selected company from localStorage on mount
+  useEffect(() => {
+    const storedCompany = localStorage.getItem("selectedCompany")
+    if (storedCompany) {
+      try {
+        const company = JSON.parse(storedCompany)
+        setSelectedCompany(company)
+        setQuery(company.title)
+      } catch (error) {
+        console.error("Error loading stored company:", error)
+        localStorage.removeItem("selectedCompany")
+      }
+    }
+  }, [])
+
+  // Pre-populate company name from UTM parameters
+  useEffect(() => {
+    if (utmParams.company_name && !query && !selectedCompany) {
+      setQuery(utmParams.company_name)
+      // Auto-search for the company if we have a company name
+      searchCompanies(utmParams.company_name)
+    }
+  }, [utmParams.company_name, query, selectedCompany])
+
+  const searchCompanies = useCallback(async (searchQuery: string) => {
+    if (!searchQuery.trim()) {
+      setCompanies([])
+      setShowDropdown(false)
+      return
+    }
+
+    setLoading(true)
+    setError("")
+
+    try {
+      const response = await fetch(`/api/companies/search?q=${encodeURIComponent(searchQuery)}`)
+
+      if (!response.ok) {
+        throw new Error("Failed to search companies")
+      }
+
+      const data = await response.json()
+      const results = data.items || []
+      setCompanies(results)
+      setShowDropdown(results.length > 0)
+      setHighlightedIndex(-1)
+    } catch (err) {
+      setError("Failed to search companies. Please try again.")
+      setCompanies([])
+      setShowDropdown(false)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      searchCompanies(query)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [query, searchCompanies])
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
+
+  // Handle keyboard navigation
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!showDropdown || companies.length === 0) return
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault()
+        setHighlightedIndex((prev) => (prev < companies.length - 1 ? prev + 1 : prev))
+        break
+      case "ArrowUp":
+        e.preventDefault()
+        setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : prev))
+        break
+      case "Enter":
+        e.preventDefault()
+        if (highlightedIndex >= 0 && highlightedIndex < companies.length) {
+          handleCompanySelect(companies[highlightedIndex])
+        }
+        break
+      case "Escape":
+        setShowDropdown(false)
+        setHighlightedIndex(-1)
+        break
+    }
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    })
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "active":
+        return "bg-green-100 text-green-800"
+      case "dissolved":
+        return "bg-red-100 text-red-800"
+      default:
+        return "bg-gray-100 text-gray-600"
+    }
+  }
+
+  const handleCompanySelect = (company: Company) => {
+    setSelectedCompany(company)
+    setQuery(company.title)
+    setShowDropdown(false)
+    setHighlightedIndex(-1)
+
+    // Store selected company in localStorage for navigation logic
+    localStorage.setItem("selectedCompany", JSON.stringify(company))
+  }
+
+  const proceedToApplication = () => {
+    if (selectedCompany) {
+      const applicationUrl = buildApplicationUrl(utmParams, selectedCompany.company_number, selectedCompany.title)
+      window.open(applicationUrl, "_blank")
+    }
+  }
+
+  const clearSelection = () => {
+    setSelectedCompany(null)
+    setQuery("")
+    localStorage.removeItem("selectedCompany")
+  }
+
+  const getPersonalizedTitle = () => {
+    if (isPersonalized && utmParams.first_name) {
+      return `Find ${utmParams.first_name}'s Company`
+    }
+    return "Find Your Company"
+  }
+
+  const getPersonalizedDescription = () => {
+    if (selectedCompany) {
+      return `Great! We found ${selectedCompany.title}. Please confirm this is the correct company.`
+    }
+    if (isPersonalized && utmParams.company_name) {
+      return `We're looking for ${utmParams.company_name} in our system. Please confirm this is the correct company.`
+    }
+    return "Search for your company using Companies House data to start your application"
+  }
+
+  const getSearchPlaceholder = () => {
+    if (isPersonalized && utmParams.company_name) {
+      return `Confirm ${utmParams.company_name}...`
+    }
+    return "Start typing your company name..."
+  }
+
+  return (
+    <section id="company-search" className="py-16 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl lg:text-4xl font-bold text-black mb-4 font-expanded">{getPersonalizedTitle()}</h2>
+            <p className="text-xl text-gray-600">{getPersonalizedDescription()}</p>
+            {isPersonalized && utmParams.industry && (
+              <p className="text-lg text-azure-600 mt-2">
+                Specialized funding solutions for {utmParams.industry} businesses
+              </p>
+            )}
+          </div>
+
+          <Card className="border-0 shadow-xl mb-8">
+            <CardHeader className="bg-azure-50">
+              <CardTitle className="flex items-center gap-2 text-2xl font-expanded text-black">
+                <Building2 className="h-6 w-6 text-azure-500" />
+                Company Search
+                {selectedCompany && (
+                  <Button
+                    onClick={clearSelection}
+                    variant="outline"
+                    size="sm"
+                    className="ml-auto text-xs bg-transparent"
+                  >
+                    Clear Selection
+                  </Button>
+                )}
+              </CardTitle>
+              <p className="text-gray-600">
+                {selectedCompany
+                  ? "Company selected! You can search for a different company or proceed with your application."
+                  : isPersonalized && utmParams.company_name
+                    ? "Confirm your company details below"
+                    : "Start typing your company name to see suggestions"}
+              </p>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="relative" ref={dropdownRef}>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Input
+                    ref={inputRef}
+                    type="text"
+                    placeholder={getSearchPlaceholder()}
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    onFocus={() => {
+                      if (companies.length > 0) setShowDropdown(true)
+                    }}
+                    className="pl-12 pr-12 text-lg py-6 border-2 border-gray-200 focus:border-azure-500 focus:ring-azure-500"
+                  />
+                  {loading && (
+                    <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-gray-400" />
+                  )}
+                  {!loading && companies.length > 0 && (
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  )}
+                </div>
+
+                {/* Predictive Dropdown */}
+                {showDropdown && companies.length > 0 && (
+                  <div className="absolute z-50 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-xl max-h-80 overflow-y-auto">
+                    <div className="p-3 border-b bg-gray-50">
+                      <span className="text-sm font-semibold text-gray-700">
+                        Select Your Company ({companies.length} results)
+                      </span>
+                    </div>
+                    {companies.slice(0, 8).map((company, index) => (
+                      <div
+                        key={company.company_number}
+                        className={`p-4 cursor-pointer border-b border-gray-100 hover:bg-azure-50 transition-colors ${
+                          index === highlightedIndex ? "bg-azure-50" : ""
+                        }`}
+                        onClick={() => handleCompanySelect(company)}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h4 className="font-bold text-black truncate text-lg">{company.title}</h4>
+                              <Badge className={`${getStatusColor(company.company_status)} text-xs font-semibold`}>
+                                {company.company_status}
+                              </Badge>
+                            </div>
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-4 text-sm text-gray-600 mb-1">
+                              <span className="flex items-center gap-1">
+                                <Hash className="h-3 w-3" />
+                                <span className="font-medium">{company.company_number}</span>
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <Calendar className="h-3 w-3" />
+                                <span>Incorporated {formatDate(company.date_of_creation)}</span>
+                              </span>
+                            </div>
+                            <div className="flex items-start gap-1 text-xs text-gray-500">
+                              <MapPin className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                              <span className="truncate">{company.address_snippet}</span>
+                            </div>
+                          </div>
+                          <CheckCircle className="h-5 w-5 text-azure-500 opacity-0 group-hover:opacity-100" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {error && <p className="text-red-600 text-sm mt-2 font-medium">{error}</p>}
+              </div>
+            </CardContent>
+          </Card>
+
+          {selectedCompany && (
+            <Card className="border-0 shadow-xl bg-white text-black">
+              <CardContent className="p-8">
+                <div className="flex flex-col sm:flex-row items-start gap-4">
+                  <CheckCircle className="h-12 w-12 text-green-600 flex-shrink-0 mt-1" />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-2xl font-bold mb-2 font-expanded text-black">Company Selected</h3>
+                    <div className="bg-gray-50 rounded-lg p-6 mb-6 border border-gray-200">
+                      <h4 className="font-bold text-2xl sm:text-3xl mb-2 text-black break-words">
+                        {selectedCompany.title}
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-base text-gray-700">
+                        <div className="flex items-center gap-2">
+                          <Hash className="h-4 w-4 flex-shrink-0" />
+                          <span className="break-all">
+                            Company Number:{" "}
+                            <span className="font-semibold text-gray-900">{selectedCompany.company_number}</span>
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 flex-shrink-0" />
+                          <span>
+                            Incorporated:{" "}
+                            <span className="font-semibold text-gray-900">
+                              {formatDate(selectedCompany.date_of_creation)}
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2 text-sm text-gray-700 mt-4">
+                        <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <span className="break-words">
+                          Registered Address:{" "}
+                          <span className="font-medium text-gray-900">{selectedCompany.address_snippet}</span>
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={proceedToApplication}
+                      size="lg"
+                      className="w-full bg-green-600 text-white hover:bg-green-700 font-bold text-xl px-12 py-6 font-expanded shadow-xl"
+                    >
+                      Apply For Funding £
+                      <ExternalLink className="ml-3 h-6 w-6" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {query && !loading && companies.length === 0 && !error && !selectedCompany && (
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-8 text-center">
+                <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 font-medium">No companies found for "{query}"</p>
+                <p className="text-sm text-gray-500 mt-2">
+                  Try searching with a different company name or partial match
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {!query && !selectedCompany && (
+            <Card className="border-0 shadow-lg bg-gray-50">
+              <CardContent className="p-8 text-center">
+                <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-bold text-black mb-2 font-expanded">Ready to Start?</h3>
+                <p className="text-gray-600">
+                  {isPersonalized && utmParams.first_name
+                    ? `${utmParams.first_name}, enter your company name above to begin your Growth Guarantee Scheme application`
+                    : "Enter your company name above to begin your Growth Guarantee Scheme application"}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
