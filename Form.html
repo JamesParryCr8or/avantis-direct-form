@@ -808,33 +808,41 @@
 
     /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
-      .page {
-        grid-template-columns: 1fr;
-        grid-template-areas: "right" "left";
-      }
+  .page {
+    grid-template-columns: 1fr;
+    grid-template-areas: "right" "left";
+  }
 
-      .left {
-        padding: 28px 24px 32px;
-        min-height: auto;
-      }
+  .left {
+    padding: 28px 24px 32px;
+    min-height: auto;
+  }
 
-      .card-image-wrap {
-        flex: 0 0 140px;
-        margin-bottom: 16px;
-      }
+  /* hide top copy on mobile */
+  .headline-eyebrow,
+  .headline,
+  .subheadline,
+  .savings-pill {
+    display: none;
+  }
 
-      .card-image-wrap img {
-        max-height: 140px;
-      }
+  .card-image-wrap {
+    flex: 0 0 140px;
+    margin-bottom: 16px;
+  }
 
-      .reviews-strip {
-        margin-top: 20px;
-      }
+  .card-image-wrap img {
+    max-height: 140px;
+  }
 
-      .right {
-        padding: 32px 20px;
-      }
-    }
+  .reviews-strip {
+    margin-top: 20px;
+  }
+
+  .right {
+    padding: 32px 20px;
+  }
+}
   </style>
 </head>
 
