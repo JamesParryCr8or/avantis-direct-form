@@ -1406,10 +1406,11 @@
           ? `https://avantis-direct-form.vercel.app/page2?id=${encodeURIComponent(id)}`
           : 'https://avantis-direct-form.vercel.app/page2';
 
-        // Create GHL contact (fire-and-forget — also saves GHL Contact ID to Airtable server-side)
+        // Create GHL contact (keepalive ensures request survives page navigation)
         fetch('/api/ghl-create-contact', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
           body: JSON.stringify({
             firstName, lastName, email, phone,
             companyName: company,
@@ -1434,6 +1435,7 @@
         fetch('/api/ghl-create-contact', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
           body: JSON.stringify({
             firstName, lastName, email, phone, companyName: company,
             recordId: '',
