@@ -65,6 +65,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0;
+      grid-template-areas: "left right";
     }
 
     /* ── LEFT PANEL ── */
@@ -76,6 +77,7 @@
       position: relative;
       overflow: hidden;
       min-height: 100vh;
+      grid-area: left;
     }
 
     .left::before {
@@ -274,6 +276,7 @@
       align-items: center;
       justify-content: center;
       padding: 48px 40px;
+      grid-area: right;
     }
 
     .form-card {
@@ -420,6 +423,12 @@
       color: var(--navy);
       margin-bottom: 20px;
       line-height: 1.4;
+    }
+    .mobile-question {display:none;}
+    /* hide qualifier on mobile, show mobile-question */
+    @media (max-width: 900px) {
+      .qualifier-q { display: none; }
+      .mobile-question { display: block; font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 20px; text-align: center; }
     }
 
     .qualifier-options {
@@ -801,6 +810,7 @@
     @media (max-width: 900px) {
       .page {
         grid-template-columns: 1fr;
+        grid-template-areas: "right" "left";
       }
 
       .left {
@@ -857,10 +867,13 @@
         <span>Saving businesses money across the UK</span>
       </div>
 
-      <div class="card-image-wrap">
+        <p class="mobile-question">Are you currently paying card processing fees?</p>
+        <div class="card-image-wrap">
         <img src="https://avantisdirect.com/wp-content/uploads/2025/03/card-machines-section-1-1.png"
           alt="Avantis card terminal">
       </div>
+
+<p class="card-caption">Card terminal</p>
 
       <!-- rotating reviews -->
       <div class="reviews-strip">
