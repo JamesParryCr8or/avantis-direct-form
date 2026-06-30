@@ -65,7 +65,6 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0;
-      grid-template-areas: "left right";
     }
 
     /* ── LEFT PANEL ── */
@@ -77,7 +76,6 @@
       position: relative;
       overflow: hidden;
       min-height: 100vh;
-      grid-area: left;
     }
 
     .left::before {
@@ -276,7 +274,6 @@
       align-items: center;
       justify-content: center;
       padding: 48px 40px;
-      grid-area: right;
     }
 
     .form-card {
@@ -423,12 +420,6 @@
       color: var(--navy);
       margin-bottom: 20px;
       line-height: 1.4;
-    }
-    .mobile-question {display:none;}
-    /* hide qualifier on mobile, show mobile-question */
-    @media (max-width: 900px) {
-      .qualifier-q { display: none; }
-      .mobile-question { display: block; font-size: 18px; font-weight: 700; color: var(--navy); margin-bottom: 20px; text-align: center; }
     }
 
     .qualifier-options {
@@ -806,43 +797,53 @@
       margin: 0 auto;
     }
 
+    /* ── MOBILE MEDIA SECTION (image + reviews below the form) ── */
+    .mobile-media-section {
+      display: none;
+      background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 60%, #071020 100%);
+      padding: 24px 24px 36px;
+      flex-direction: column;
+    }
+
+    .mobile-media-section .card-image-wrap {
+      flex: 0 0 140px;
+      margin-bottom: 16px;
+    }
+
+    .mobile-media-section .card-image-wrap img {
+      max-height: 140px;
+    }
+
+    .mobile-media-section .reviews-strip {
+      margin-top: 0;
+    }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
-  .page {
-    grid-template-columns: 1fr;
-    grid-template-areas: "right" "left";
-  }
+      .page {
+        grid-template-columns: 1fr;
+      }
 
-  .left {
-    padding: 28px 24px 32px;
-    min-height: auto;
-  }
+      .left {
+        padding: 28px 24px 32px;
+        min-height: auto;
+      }
 
-  /* hide top copy on mobile */
-  .headline-eyebrow,
-  .headline,
-  .subheadline,
-  .savings-pill {
-    display: none;
-  }
+      /* Hide image + reviews in left panel — they appear below the form instead */
+      .left .card-image-wrap,
+      .left .reviews-strip,
+      .mobile-scroll-cta {
+        display: none;
+      }
 
-  .card-image-wrap {
-    flex: 0 0 140px;
-    margin-bottom: 16px;
-  }
+      .right {
+        padding: 32px 20px;
+      }
 
-  .card-image-wrap img {
-    max-height: 140px;
-  }
-
-  .reviews-strip {
-    margin-top: 20px;
-  }
-
-  .right {
-    padding: 32px 20px;
-  }
-}
+      .mobile-media-section {
+        display: flex;
+      }
+    }
   </style>
 </head>
 
@@ -875,13 +876,10 @@
         <span>Saving businesses money across the UK</span>
       </div>
 
-        <p class="mobile-question">Are you currently paying card processing fees?</p>
-        <div class="card-image-wrap">
+      <div class="card-image-wrap">
         <img src="https://avantisdirect.com/wp-content/uploads/2025/03/card-machines-section-1-1.png"
           alt="Avantis card terminal">
       </div>
-
-<p class="card-caption">Card terminal</p>
 
       <!-- rotating reviews -->
       <div class="reviews-strip">
@@ -1025,6 +1023,26 @@
 
       </div>
     </div>
+
+    <!-- ═══ MOBILE ONLY: image + reviews below the form ═══ -->
+    <div class="mobile-media-section">
+      <div class="card-image-wrap">
+        <img src="https://avantisdirect.com/wp-content/uploads/2025/03/card-machines-section-1-1.png"
+          alt="Avantis card terminal">
+      </div>
+      <div class="reviews-strip">
+        <div class="stars">★★★★★</div>
+        <div class="review-text" id="m-review-text">"Saleem was so helpful, went above and beyond to make sure we were happy. Whatever Avantis are paying him is not enough."</div>
+        <div class="review-author" id="m-review-author">— Paul Brackstone, Mexbox</div>
+        <div class="review-dots">
+          <span class="active" onclick="goReview(0)"></span>
+          <span onclick="goReview(1)"></span>
+          <span onclick="goReview(2)"></span>
+          <span onclick="goReview(3)"></span>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -1039,8 +1057,13 @@
     let currentReview = 0;
     function goReview(i) {
       currentReview = i;
-      document.getElementById('review-text').textContent = reviews[i].text;
-      document.getElementById('review-author').textContent = reviews[i].author;
+      const t = reviews[i].text, a = reviews[i].author;
+      document.getElementById('review-text').textContent = t;
+      document.getElementById('review-author').textContent = a;
+      const mrt = document.getElementById('m-review-text');
+      const mra = document.getElementById('m-review-author');
+      if (mrt) mrt.textContent = t;
+      if (mra) mra.textContent = a;
       document.querySelectorAll('.review-dots span').forEach((d, idx) => d.classList.toggle('active', idx === i));
     }
     setInterval(() => goReview((currentReview + 1) % reviews.length), 5000);
