@@ -1,13 +1,9 @@
 const GHL_URL = 'https://services.leadconnectorhq.com';
+const { proofFor, headers, postOnly } = require('../lib/validation');
 
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST')   return res.status(405).json({ error: 'Method not allowed' });
+  if (!postOnly(req, res)) return;
 
-  const GHL_TOKEN = process.env.GHL_ACCESS_TOKEN;
 
   const {
     contactId,
@@ -28,16 +24,14 @@ module.exports = async function handler(req, res) {
   ].filter(Boolean);
 
   try {
+    // Page 3 only changes its follow-up URL; contact-detail edits require proof.
+    const proof = email !== undefined || phone !== undefined ? proofFor(req.body) : null;
     const updateRes = await fetch(`${GHL_URL}/contacts/${contactId}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type':  'application/json',
-        'Accept':        'application/json',
-        'Authorization': `Bearer ${GHL_TOKEN}`,
-        'Version':       '2021-07-28',
-      },
+      headers: headers(),
+      signal: AbortSignal.timeout(15000),
       body: JSON.stringify({
-        firstName, lastName, email, phone,
+        firstName, lastName, email: proof?.email, phone: proof?.phone,
         companyName, website,
         address1, city, state, postalCode,
         country: 'GB',
@@ -52,9 +46,9 @@ module.exports = async function handler(req, res) {
       console.log('GHL contact updated:', contactId);
     }
 
-    return res.status(updateRes.ok ? 200 : updateRes.status).json({ ok: updateRes.ok, data });
+    return res.status(updateRes.ok ? 200 : 502).json(updateRes.ok ? { ok: true } : { error: 'We could not update your CRM details. Please try again.' });
   } catch (err) {
     console.error('ghl-update-contact error:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(err.status || 500).json({ error: err.status ? err.message : 'We could not save your details. Please try again.' });
   }
 };

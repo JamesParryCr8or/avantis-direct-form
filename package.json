@@ -1,0 +1,14 @@
+{
+  "name": "avantis-direct-form",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "node --test tests/*.test.js",
+    "postinstall": "node scripts/copy-phone-assets.js",
+    "setup:twilio": "node --env-file=.env.local scripts/setup-twilio.js"
+  },
+  "dependencies": {
+    "intl-tel-input": "25.3.1",
+    "libphonenumber-js": "1.12.24"
+  }
+}

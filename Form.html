@@ -845,6 +845,8 @@
       }
     }
   </style>
+<link rel="stylesheet" href="/vendor/intl-tel-input/css/intlTelInput.css">
+<link rel="stylesheet" href="/contact-validation.css">
 </head>
 
 <body>
@@ -1005,13 +1007,14 @@
           </div>
 
           <div class="field">
-            <label>Mobile number</label>
+            <label for="f-phone">Mobile number</label>
             <div class="field-wrap">
-              <input type="tel" id="f-phone" placeholder="07700 900000" autocomplete="tel" maxlength="13"
+              <input type="tel" id="f-phone" placeholder="07700 900000" autocomplete="tel"
                 oninput="validatePhone()">
               <span class="field-icon" id="icon-phone"></span>
             </div>
-            <div class="field-error" id="err-phone">Please enter a valid UK mobile number</div>
+            <div class="field-error" id="err-phone">Please enter a valid mobile number</div>
+            <p class="phone-help">We'll text you a code to verify your mobile number.</p>
           </div>
 
           <button class="cta-btn" id="step3-btn" onclick="submitForm()">
@@ -1045,6 +1048,8 @@
 
   </div>
 
+  <script src="/vendor/intl-tel-input/js/intlTelInput.min.js"></script>
+  <script src="/contact-validation.js"></script>
   <script>
     // ── Reviews rotator ──
     const reviews = [
@@ -1146,6 +1151,8 @@
       if (pl2) pl2.style.width = step > 2 ? '100%' : '0%';
     }
 
+    ContactValidation.init('f-phone');
+
     // ── Validation helpers ──
     function setFieldState(id, iconId, errId, valid, msg) {
       const input = document.getElementById(id);
@@ -1171,13 +1178,14 @@
       const v = document.getElementById('f-email').value.trim();
       const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
       setFieldState('f-email', 'icon-email', 'err-email', v.length ? ok : null, 'Please enter a valid email address');
+      ContactValidation.restoreEmailResult();
       return ok;
     }
 
     function validatePhone() {
-      const raw = document.getElementById('f-phone').value.replace(/\s/g, '');
-      const ok = /^(07\d{9}|\+447\d{9})$/.test(raw);
-      setFieldState('f-phone', 'icon-phone', 'err-phone', raw.length ? ok : null, 'Please enter a valid UK mobile number (e.g. 07700 900000)');
+      const raw = document.getElementById('f-phone').value.trim();
+      const ok = ContactValidation.valid('f-phone');
+      setFieldState('f-phone', 'icon-phone', 'err-phone', raw.length ? ok : null, 'Please enter a valid mobile number');
       return ok;
     }
 
@@ -1342,17 +1350,19 @@
 
     // ── Submit ──
     async function submitForm() {
-      if (!validateStep3()) return;
-
-      if (typeof fbq !== 'undefined') fbq('track', 'Lead');
-
       const btn = document.getElementById('step3-btn');
-      btn.disabled = true;
-      btn.textContent = 'Submitting…';
+      if (btn.disabled || !validateStep3()) return;
+
+      ContactValidation.setLoading(btn, 'Verifying…');
+      document.getElementById('submit-error')?.remove();
+      let verificationToken;
+      try { verificationToken = await ContactValidation.ensure('f-phone', document.getElementById('f-email').value); }
+      catch (err) { showSubmitError(err.message); return; }
+      ContactValidation.setLoading(btn, 'Submitting…');
 
       const fullName = document.getElementById('f-name').value.trim();
       const email = document.getElementById('f-email').value.trim();
-      const phone = document.getElementById('f-phone').value.trim();
+      const phone = ContactValidation.number('f-phone');
       const nameParts = fullName.split(' ');
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
@@ -1377,7 +1387,6 @@
         }));
       } catch {}
 
-      try { localStorage.removeItem('avantis_draft'); } catch {}
 
       const atFields = {
         'Company Name': company,
@@ -1391,61 +1400,49 @@
       };
       Object.entries(utmData).forEach(([k, v]) => { if (v) atFields[k] = v; });
 
-      const WEBHOOK = '/api/send-webhook';
-
       try {
-        const atRes = await fetch('/api/airtable-create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ fields: atFields })
+        // Reuse an Airtable record on retries after a CRM error.
+        let id = sessionStorage.getItem('avantis_pending_record_id');
+        if (!id) {
+          try {
+            const response = await fetch('/api/airtable-create', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ fields: atFields }),
+            });
+            const data = await response.json();
+            if (response.ok && data.id) {
+              id = data.id;
+              sessionStorage.setItem('avantis_pending_record_id', id);
+            }
+          } catch { /* GHL remains the primary lead destination. */ }
+        }
+        const response = await fetch('/api/ghl-create-contact', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ firstName, lastName, email, phone, verificationToken,
+            companyName: company, recordId: id || '', cardMachine: atFields['Are you currently using a card machine?'] }),
         });
-        const atData = await atRes.json();
-        const id = atRes.ok ? atData.id : null;
-
-        const page2Url = id
-          ? `https://avantis-direct-form.vercel.app/page2?id=${encodeURIComponent(id)}`
-          : 'https://avantis-direct-form.vercel.app/page2';
-
-        // Create GHL contact (keepalive ensures request survives page navigation)
-        fetch('/api/ghl-create-contact', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          keepalive: true,
-          body: JSON.stringify({
-            firstName, lastName, email, phone,
-            companyName: company,
-            recordId: id || '',
-            cardMachine: qualifierValue === 'yes-terminal' ? 'Yes'
-                       : qualifierValue === 'exploring'    ? 'Just Exploring'
-                       : 'No',
-          })
-        }).catch(() => {});
-
-        // Update Url field to page2 URL so Airtable always links to the next step
+        const data = await response.json();
+        if (!response.ok || !data.contactId) throw new Error(data.error || 'We could not save your details. Please try again.');
+        sessionStorage.setItem('avantis_ghl_contact_id', data.contactId);
+        sessionStorage.removeItem('avantis_pending_record_id');
+        try { localStorage.removeItem('avantis_draft'); } catch {}
         if (id) {
-          fetch('/api/airtable-update', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ recordId: id, fields: { 'Url': page2Url } })
+          await fetch('/api/airtable-update', {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recordId: id, fields: { 'Url': `${location.origin}/page2?id=${encodeURIComponent(id)}` } }),
           }).catch(() => {});
         }
-
+        if (typeof fbq !== 'undefined') fbq('track', 'Lead');
         window.location.href = '/page2' + (id ? '?id=' + encodeURIComponent(id) : '');
-      } catch {
-        fetch('/api/ghl-create-contact', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          keepalive: true,
-          body: JSON.stringify({
-            firstName, lastName, email, phone, companyName: company,
-            recordId: '',
-            cardMachine: qualifierValue === 'yes-terminal' ? 'Yes'
-                       : qualifierValue === 'exploring'    ? 'Just Exploring'
-                       : 'No',
-          })
-        }).catch(() => {});
-        window.location.href = '/page2';
-      }
+      } catch (err) { showSubmitError(err.message); }
+    }
+    function showSubmitError(message) {
+      const btn = document.getElementById('step3-btn');
+      ContactValidation.clearLoading(btn);
+      const error = document.createElement('div');
+      error.id = 'submit-error'; error.className = 'submission-error'; error.setAttribute('role', 'alert');
+      error.textContent = message;
+      btn.insertAdjacentElement('afterend', error);
     }
     // ── Draft persistence ──
     function saveFormDraft() {
@@ -1453,7 +1450,7 @@
         localStorage.setItem('avantis_draft', JSON.stringify({
           name:    document.getElementById('f-name').value,
           email:   document.getElementById('f-email').value,
-          phone:   document.getElementById('f-phone').value,
+          phone:   ContactValidation.number('f-phone') || document.getElementById('f-phone').value,
           company: document.getElementById('f-company').value,
           selectedCompany,
           noCompanySelected,
@@ -1468,7 +1465,7 @@
         const d = JSON.parse(raw);
         if (d.name)  { document.getElementById('f-name').value  = d.name;  validateName();  }
         if (d.email) { document.getElementById('f-email').value = d.email; validateEmail(); }
-        if (d.phone) { document.getElementById('f-phone').value = d.phone; validatePhone(); }
+        if (d.phone) { ContactValidation.setNumber('f-phone', d.phone); validatePhone(); }
         if (d.company) document.getElementById('f-company').value = d.company;
         if (d.selectedCompany) {
           selectedCompany = d.selectedCompany;

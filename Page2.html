@@ -184,6 +184,8 @@
       .field-row, .dob-partial-row { grid-template-columns: 1fr; }
     }
   </style>
+<link rel="stylesheet" href="/vendor/intl-tel-input/css/intlTelInput.css">
+<link rel="stylesheet" href="/contact-validation.css">
 </head>
 
 <body>
@@ -304,7 +306,7 @@
           <div class="field">
             <label>Phone Number <span class="req">*</span></label>
             <input type="tel" id="p2-phone" placeholder="07700 900000" required>
-            <div class="field-error" id="err-phone">Valid UK number required</div>
+            <div class="field-error" id="err-phone">Valid mobile number required</div>
           </div>
           </div><!-- /section-company-info -->
 
@@ -446,6 +448,8 @@
     </div>
   </div>
 
+  <script src="/vendor/intl-tel-input/js/intlTelInput.min.js"></script>
+  <script src="/contact-validation.js"></script>
   <script>
     const params   = new URLSearchParams(window.location.search);
     const recordId = params.get('id') || null;
@@ -580,14 +584,16 @@
       return SIC[clean] || clean;
     }
 
+    ContactValidation.init('p2-phone');
+
     let vatValue          = null;
     let chDirectors       = [];      // active directors from CH
     let selectedDobPartial = null;  // { month, year } from CH
     let directorSelectHidden = false;
-    let ghlContactId      = null;   // GHL contact ID, captured from Airtable prefill
+    let ghlContactId      = sessionStorage.getItem('avantis_ghl_contact_id');   // GHL contact ID, captured from Airtable prefill
 
     // ── helpers ──
-    function setVal(id, val) { const el = document.getElementById(id); if (el && val) el.value = val; }
+    function setVal(id, val) { const el = document.getElementById(id); if (el && val) { if (id === 'p2-phone') ContactValidation.setNumber(id, val); else el.value = val; } }
 
     // ── Step 1: prefill from sessionStorage (instant) then Airtable (persistent) ──
     async function prefillFromRecord() {
@@ -931,12 +937,12 @@
       const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
       document.getElementById('p2-email').classList.toggle('invalid', !ok);
       document.getElementById('err-email').classList.toggle('show',   !ok);
+      ContactValidation.restoreEmailResult();
       return ok;
     }
 
     function validatePhone() {
-      const raw = document.getElementById('p2-phone').value.replace(/\s/g, '');
-      const ok  = /^(07\d{9}|\+447\d{9})$/.test(raw);
+      const ok = ContactValidation.valid('p2-phone');
       document.getElementById('p2-phone').classList.toggle('invalid', !ok);
       document.getElementById('err-phone').classList.toggle('show',   !ok);
       return ok;
@@ -1000,6 +1006,13 @@
       }
       banner.style.display = 'none';
 
+      const submitButton = document.getElementById('p2-submit-btn');
+      if (submitButton.disabled) return;
+      ContactValidation.setLoading(submitButton, 'Verifying…');
+      let verificationToken;
+      try { verificationToken = await ContactValidation.ensure('p2-phone', document.getElementById('p2-email').value); }
+      catch (err) { ContactValidation.clearLoading(submitButton); alert(err.message); return; }
+      ContactValidation.setLoading(submitButton, 'Submitting…');
       document.getElementById('loading-overlay').classList.add('show');
 
       const dob = getDobValue();
@@ -1013,7 +1026,7 @@
         'Are you VAT registered?': vatValue,
         'VAT Number':              vatValue ? (document.getElementById('p2-vat-number').value.trim() || undefined) : undefined,
         'Email':                   document.getElementById('p2-email').value.trim(),
-        'Phone':                   document.getElementById('p2-phone').value.trim(),
+        'Phone':                   ContactValidation.number('p2-phone'),
         'Website':                 document.getElementById('p2-website').value.trim() || undefined,
         'Address (Trading address)':             document.getElementById('p2-trade-addr1').value.trim(),
         'Zip/Postal code (Trading address)':     document.getElementById('p2-trade-postcode').value.trim(),
@@ -1050,6 +1063,7 @@
           });
         }
         const data = await res.json();
+        if (!res.ok) throw new Error('We could not save your application. Please try again.');
         const id   = recordId || data.id;
 
         // If a new record was created (no prior recordId), set Url to page3 now we know the ID
@@ -1061,14 +1075,25 @@
           }).catch(() => {});
         }
 
-        // Update GHL contact with business details (fire-and-forget)
+        // Wait for the CRM update before continuing.
+        if (!ghlContactId) {
+          const created = await fetch('/api/ghl-create-contact', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: fields['Email'], phone: fields['Phone'], companyName: fields['Company Name'], recordId: id, verificationToken }),
+          });
+          const contact = await created.json();
+          if (!created.ok || !contact.contactId) throw new Error(contact.error || 'We could not save your CRM contact.');
+          ghlContactId = contact.contactId;
+          sessionStorage.setItem('avantis_ghl_contact_id', ghlContactId);
+        }
         if (ghlContactId) {
           const p3Id = id || recordId;
-          fetch('/api/ghl-update-contact', {
+          const crmResponse = await fetch('/api/ghl-update-contact', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               contactId:     ghlContactId,
+              verificationToken,
               firstName:     fields['First_Name'],
               lastName:      fields['Last_Name'],
               email:         fields['Email'],
@@ -1085,7 +1110,9 @@
                 ? `https://avantis-direct-form.vercel.app/page3?id=${encodeURIComponent(p3Id)}`
                 : undefined,
             })
-          }).catch(() => {});
+          });
+          const crmData = await crmResponse.json();
+          if (!crmResponse.ok) throw new Error(crmData.error || 'We could not update your CRM details.');
         }
 
         if (typeof fbq !== 'undefined') fbq('track', 'CompleteRegistration');
@@ -1093,7 +1120,8 @@
       } catch (err) {
         console.error('Submit error:', err);
         document.getElementById('loading-overlay').classList.remove('show');
-        alert('Something went wrong. Please try again.');
+        ContactValidation.clearLoading(submitButton);
+        alert(err.message || 'Something went wrong. Please try again.');
       }
     });
 

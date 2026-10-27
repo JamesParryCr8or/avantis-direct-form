@@ -2,43 +2,36 @@ const GHL_URL     = 'https://services.leadconnectorhq.com';
 const LOCATION_ID = '8qkx5Hada8mesjOqMckj';
 const AT_BASE     = 'appwmu552AUleDadr';
 const AT_TABLE    = 'tblUlFciubEeVTFm7';
+const { proofFor, headers, postOnly } = require('../lib/validation');
 
 module.exports = async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST')   return res.status(405).json({ error: 'Method not allowed' });
+  if (!postOnly(req, res)) return;
 
-  const GHL_TOKEN = process.env.GHL_ACCESS_TOKEN;
   const AT_PAT    = process.env.AIRTABLE_PERSONAL_ACCESS_TOKEN;
 
-  const { firstName, lastName, email, phone, companyName, recordId, cardMachine } = req.body || {};
+  const { firstName, lastName, companyName, recordId, cardMachine } = req.body || {};
 
   const reviewUrl = recordId
     ? `https://avantis-direct-form.vercel.app/review?id=${recordId}`
     : '';
 
   try {
-    // 1. Create GHL contact
-    const createRes = await fetch(`${GHL_URL}/contacts/`, {
+    const proof = proofFor(req.body || {});
+    // Upsert makes a retry safe when a provider response or navigation is interrupted.
+    const createRes = await fetch(`${GHL_URL}/contacts/upsert`, {
       method: 'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Accept':        'application/json',
-        'Authorization': `Bearer ${GHL_TOKEN}`,
-        'Version':       '2021-07-28',
-      },
+      headers: headers(),
+      signal: AbortSignal.timeout(15000),
       body: JSON.stringify({
         firstName,
         lastName,
         name:       [firstName, lastName].filter(Boolean).join(' '),
-        email,
-        phone,
+        email: proof.email,
+        phone: proof.phone,
         companyName,
-        locationId: LOCATION_ID,
+        locationId: process.env.GHL_LOCATION_ID || LOCATION_ID,
         source:     'public api',
-        tags:       ['website'],
+        tags:       ['website', 'phone-verified', `email-${proof.emailResult.status}`],
         customFields: [
           recordId    ? { id: 'S1KufkT83xxvvbPh4RAk', fieldValue: recordId }    : null,
           reviewUrl   ? { id: '7Fk4WaOYtd3AjtNSgTPv', fieldValue: reviewUrl }   : null,
@@ -51,10 +44,11 @@ module.exports = async function handler(req, res) {
     const createData = await createRes.json();
     if (!createRes.ok) {
       console.error('GHL create contact failed:', createRes.status, createData);
-      return res.status(createRes.status).json(createData);
+      return res.status(502).json({ error: 'We could not save your details to our CRM. Please try again.' });
     }
 
     const contactId = createData.contact?.id;
+    if (!contactId) return res.status(502).json({ error: 'CRM did not confirm your contact. Please try again.' });
     console.log('GHL contact created:', contactId);
 
     // 2. Write GHL Contact ID to Airtable immediately (before workflow, so a slow
@@ -63,6 +57,7 @@ module.exports = async function handler(req, res) {
       try {
         const atRes = await fetch(`https://api.airtable.com/v0/${AT_BASE}/${AT_TABLE}/${recordId}`, {
           method: 'PATCH',
+          signal: AbortSignal.timeout(8000),
           headers: {
             'Authorization': `Bearer ${AT_PAT}`,
             'Content-Type':  'application/json',
@@ -79,6 +74,6 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({ ok: true, contactId });
   } catch (err) {
     console.error('ghl-create-contact error:', err);
-    return res.status(500).json({ error: err.message });
+    return res.status(err.status || 500).json({ error: err.status ? err.message : 'We could not save your details. Please try again.' });
   }
 };

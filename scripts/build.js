@@ -1,0 +1,5 @@
+const fs = require('node:fs');
+require('./copy-phone-assets');
+for (const file of ['Form.html', 'Form-UAE.html', 'Page2.html', 'Page3.html', 'Review.html']) {
+  fs.copyFileSync(file, `public/${file}`);
+}

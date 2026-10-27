@@ -1,1 +1,7 @@
 .vercel
+node_modules/
+.npm-cache/
+.env*
+!.env.example
+public/vendor/
+public/*.html

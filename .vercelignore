@@ -1,0 +1,6 @@
+.git
+.claude
+.env*
+.npm-cache
+node_modules
+tests

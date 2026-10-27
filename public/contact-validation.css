@@ -1,0 +1,27 @@
+.iti { width: 100%; --iti-border-color: #d6dce3; --iti-hover-color: #edf6f1; }
+.iti__selected-country { color: #202b38; font: inherit; }
+.phone-help { margin-top: 8px; color: #5a6a88; font-size: 12px; line-height: 1.5; }
+.email-validation-wrap { position: relative; }
+.email-validation-wrap input { padding-right: 42px; }
+.email-validation-icon { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; }
+.iti input[type=tel] { width: 100%; padding-right: 42px; }
+.iti__dropdown-content { z-index: 50; border-radius: 10px; box-shadow: 0 8px 30px #0002; }
+.iti__search-input { padding: 12px !important; }
+.iti__country-list { color: #202b38; text-align: left; }
+.contact-dialog { margin: auto; inset: 0; max-height: calc(100dvh - 32px); overflow-y: auto; border: 0; border-radius: 18px; padding: 28px; width: min(420px, calc(100vw - 32px)); color: #202b38; font-family: Inter, sans-serif; box-sizing: border-box; box-shadow: 0 20px 80px #0004; }
+.contact-dialog::backdrop { background: #102a35aa; }
+.contact-dialog h2 { font-size: 24px; margin: 0 0 12px; }
+.contact-dialog p { line-height: 1.6; margin: 12px 0; }
+.contact-dialog label { display: block; font-weight: 600; margin: 16px 0 8px; }
+.contact-dialog input { box-sizing: border-box; width: 100%; border: 1px solid #b7c4ce; border-radius: 8px; padding: 14px; font: inherit; font-size: 24px; letter-spacing: .2em; }
+.contact-dialog button { cursor: pointer; font: inherit; border-radius: 8px; padding: 12px 16px; }
+.contact-dialog .verify-confirm { width: 100%; background: #12834d; border: 0; color: white; font-weight: 700; margin-top: 16px; }
+.contact-dialog .verify-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 14px; }
+.contact-dialog .verify-actions button { background: white; border: 1px solid #cbd4db; font-size: 13px; }
+.contact-dialog button:disabled { opacity: .55; cursor: wait; }
+.contact-dialog .verify-error { color: #b42318; font-size: 14px; }
+.submission-error { color: #b42318; padding-top: 12px; line-height: 1.5; }
+button.is-loading { display: inline-flex; align-items: center; justify-content: center; gap: 10px; cursor: wait; }
+button.is-loading::after { content: ''; display: inline-block; width: 18px; height: 18px; flex: 0 0 18px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: button-loading-spin .7s linear infinite; }
+@keyframes button-loading-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { button.is-loading::after { animation-duration: 2s; } }
