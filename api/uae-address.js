@@ -45,6 +45,7 @@ module.exports = async function handler(req, res) {
           city:     parts('locality') || parts('sublocality_level_1'),
           county:   parts('administrative_area_level_1'), // emirate, e.g. "Dubai"
           postcode: parts('postal_code'),                 // usually empty in the UAE
+          country:  parts('country'),                     // e.g. "United Arab Emirates"
         },
       });
     } catch (err) {
@@ -59,7 +60,12 @@ module.exports = async function handler(req, res) {
       const r = await fetch(AUTOCOMPLETE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': KEY, Referer: REFERER },
-        body: JSON.stringify({ input: q, includedRegionCodes: ['ae'], languageCode: 'en' }),
+        // Bias ranks UAE results first but still returns addresses from elsewhere.
+        body: JSON.stringify({
+          input: q,
+          languageCode: 'en',
+          locationBias: { rectangle: { low: { latitude: 22.6, longitude: 51.5 }, high: { latitude: 26.1, longitude: 56.4 } } },
+        }),
         signal: AbortSignal.timeout(8000),
       });
       const data = await r.json();

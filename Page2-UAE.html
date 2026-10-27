@@ -281,6 +281,7 @@
           <div class="field">
             <label>Address Line 1 <span class="req">*</span></label>
             <input type="text" id="p2-trade-addr1" placeholder="Building name, street, area" required>
+            <input type="hidden" id="p2-trade-country">
             <div class="field-error" id="err-trade-addr1">Required</div>
           </div>
 
@@ -332,6 +333,7 @@
           <div class="field">
             <label>Home Address Line 1 <span class="req">*</span></label>
             <input type="text" id="p2-dir-addr1" placeholder="Building name, street, area">
+            <input type="hidden" id="p2-dir-country">
             <div class="field-error" id="err-dir-addr1">Required</div>
           </div>
 
@@ -488,6 +490,9 @@
               if (elP && a.postcode) elP.value = a.postcode;
               if (elC && a.city)     elC.value = a.city;
               if (elE && a.county)   elE.value = a.county;
+              // The country hidden field sits beside the address line, e.g. p2-trade-addr1 -> p2-trade-country.
+              const elK = document.getElementById(addr1Id.replace('-addr1', '-country'));
+              if (elK) elK.value = a.country || '';
               input.value = [a.line1, a.city].filter(Boolean).join(', ');
             }
           } catch {}
@@ -537,13 +542,19 @@
       return ok;
     }
 
+    // Emirates only apply to UAE addresses; other countries are entered in full.
+    function emirateRequired(countryId) {
+      const country = document.getElementById(countryId).value;
+      return !country || country === 'United Arab Emirates';
+    }
+
     function validateDirectorSection() {
       return [
         req('p2-director-name', 'err-director-name'),
         req('p2-dob',           'err-dob'),
         req('p2-dir-addr1',     'err-dir-addr1'),
         req('p2-dir-city',      'err-dir-city'),
-        req('p2-dir-emirate',   'err-dir-emirate'),
+        emirateRequired('p2-dir-country') ? req('p2-dir-emirate', 'err-dir-emirate') : true,
       ].every(Boolean);
     }
 
@@ -559,7 +570,7 @@
         req('p2-trading-length', 'err-trading-length'),
         req('p2-trade-addr1',    'err-trade-addr1'),
         req('p2-trade-city',     'err-trade-city'),
-        req('p2-trade-emirate',  'err-trade-emirate'),
+        emirateRequired('p2-trade-country') ? req('p2-trade-emirate', 'err-trade-emirate') : true,
       ]).every(Boolean);
 
       const contactOk = [validateEmail(), validatePhone()].every(Boolean);
@@ -599,13 +610,13 @@
         'Zip/Postal code (Trading address)':     val('p2-trade-pobox') || undefined,
         'City (Trading address)':                val('p2-trade-city'),
         'State/Province (Trading address)':      val('p2-trade-emirate'),
-        'Country (Trading address)':             'United Arab Emirates',
+        'Country (Trading address)':             val('p2-trade-country') || 'United Arab Emirates',
         "Director's / Proprietor Full Name":     val('p2-director-name'),
         "Director's / Proprietor Date of Birth": val('p2-dob') || undefined,
         'Address (Director\'s / Proprietor Address)':          val('p2-dir-addr1'),
         'City (Director\'s / Proprietor Address)':            val('p2-dir-city'),
         'State/Province (Director\'s / Proprietor Address)':  val('p2-dir-emirate'),
-        'Country (Director\'s / Proprietor Address)':         'United Arab Emirates',
+        'Country (Director\'s / Proprietor Address)':         val('p2-dir-country') || 'United Arab Emirates',
         'Status': "Director's Details Added",
         'Url': recordId
           ? `https://avantis-direct-form.vercel.app/page3?id=${encodeURIComponent(recordId)}`
