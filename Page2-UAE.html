@@ -242,19 +242,6 @@
               </select>
               <div class="field-error" id="err-trading-length">Required</div>
             </div>
-            <div class="field">
-              <label>Registered for VAT? <span class="req">*</span></label>
-              <div class="radio-group" id="vat-group">
-                <button type="button" class="radio-btn" data-val="true"  onclick="selectVat(this)">✅ Yes</button>
-                <button type="button" class="radio-btn" data-val="false" onclick="selectVat(this)">❌ No</button>
-              </div>
-              <div class="field-error" id="err-vat">Required</div>
-            </div>
-          </div>
-
-          <div class="field" id="vat-number-wrap" style="display:none">
-            <label>TRN Number <span class="opt">(Tax Registration Number)</span></label>
-            <input type="text" id="p2-vat-number" placeholder="e.g. 100123456700003">
           </div>
 
           <div class="field-row">
@@ -389,7 +376,6 @@
       smsNote: 'SMS verification is available for UAE and UK mobiles.',
     });
 
-    let vatValue = null;
     let ghlContactId = sessionStorage.getItem('avantis_ghl_contact_id');
 
     // ── Emirate dropdowns ──
@@ -450,15 +436,6 @@
         document.getElementById('name-display').textContent = 'your business';
         document.querySelector('.left-sub').textContent = 'Just a few personal details to get you set up.';
       } catch {}
-    }
-
-    // ── VAT toggle ──
-    function selectVat(btn) {
-      document.querySelectorAll('#vat-group .radio-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      vatValue = btn.dataset.val === 'true';
-      document.getElementById('vat-number-wrap').style.display = vatValue ? 'block' : 'none';
-      document.getElementById('err-vat').classList.remove('show');
     }
 
     // ── Address search (Google Places, UAE only) ──
@@ -587,14 +564,10 @@
 
       const contactOk = [validateEmail(), validatePhone()].every(Boolean);
 
-      if (!isSoleTrader && vatValue === null) {
-        document.getElementById('err-vat').classList.add('show');
-      }
-
       const dirOk = validateDirectorSection();
 
       const banner = document.getElementById('form-error-banner');
-      if (!baseOk || !contactOk || (!isSoleTrader && vatValue === null) || !dirOk) {
+      if (!baseOk || !contactOk || !dirOk) {
         banner.style.display = 'flex';
         (document.querySelector('.invalid') || document.querySelector('.field-error.show'))
           ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -619,8 +592,6 @@
         'Company Number':          val('p2-company-number') || undefined,
         'Type of business':        val('p2-biz-type'),
         'How long have you been trading for?': val('p2-trading-length'),
-        'Are you VAT registered?': vatValue,
-        'VAT Number':              vatValue ? (val('p2-vat-number') || undefined) : undefined,
         'Email':                   val('p2-email'),
         'Phone':                   ContactValidation.number('p2-phone'),
         'Website':                 val('p2-website') || undefined,

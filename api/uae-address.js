@@ -2,6 +2,8 @@
 // Autocomplete returns suggestions (?q=), Place Details resolves one (?id=).
 const AUTOCOMPLETE = 'https://places.googleapis.com/v1/places:autocomplete';
 const DETAILS      = 'https://places.googleapis.com/v1/places';
+// The key may carry a website restriction for this site, so server calls send it as the referrer.
+const REFERER      = 'https://avantis-direct-form.vercel.app/';
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -21,7 +23,7 @@ module.exports = async function handler(req, res) {
   if (id) {
     try {
       const r = await fetch(`${DETAILS}/${encodeURIComponent(id)}?languageCode=en`, {
-        headers: { 'X-Goog-Api-Key': KEY, 'X-Goog-FieldMask': 'addressComponents,formattedAddress' },
+        headers: { 'X-Goog-Api-Key': KEY, 'X-Goog-FieldMask': 'addressComponents,formattedAddress', Referer: REFERER },
         signal: AbortSignal.timeout(8000),
       });
       const place = await r.json();
@@ -56,7 +58,7 @@ module.exports = async function handler(req, res) {
     try {
       const r = await fetch(AUTOCOMPLETE, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': KEY },
+        headers: { 'Content-Type': 'application/json', 'X-Goog-Api-Key': KEY, Referer: REFERER },
         body: JSON.stringify({ input: q, includedRegionCodes: ['ae'], languageCode: 'en' }),
         signal: AbortSignal.timeout(8000),
       });
