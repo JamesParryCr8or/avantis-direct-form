@@ -1418,7 +1418,7 @@
         }
         const response = await fetch('/api/ghl-create-contact', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ firstName, lastName, email, phone, verificationToken,
+          body: JSON.stringify({ firstName, lastName, email, phone, verificationToken, leadSource: 'uk-terminals',
             companyName: company, recordId: id || '', cardMachine: atFields['Are you currently using a card machine?'] }),
         });
         const data = await response.json();

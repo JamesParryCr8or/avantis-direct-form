@@ -2,14 +2,14 @@ const GHL_URL     = 'https://services.leadconnectorhq.com';
 const LOCATION_ID = '8qkx5Hada8mesjOqMckj';
 const AT_BASE     = 'appwmu552AUleDadr';
 const AT_TABLE    = 'tblUlFciubEeVTFm7';
-const { proofFor, headers, postOnly } = require('../lib/validation');
+const { proofFor, headers, postOnly, leadTag } = require('../lib/validation');
 
 module.exports = async function handler(req, res) {
   if (!postOnly(req, res)) return;
 
   const AT_PAT    = process.env.AIRTABLE_PERSONAL_ACCESS_TOKEN;
 
-  const { firstName, lastName, companyName, recordId, cardMachine } = req.body || {};
+  const { firstName, lastName, companyName, recordId, cardMachine, leadSource } = req.body || {};
 
   const reviewUrl = recordId
     ? `https://avantis-direct-form.vercel.app/review?id=${recordId}`
@@ -31,7 +31,7 @@ module.exports = async function handler(req, res) {
         companyName,
         locationId: process.env.GHL_LOCATION_ID || LOCATION_ID,
         source:     'public api',
-        tags:       ['website', 'phone-verified', `email-${proof.emailResult.status}`],
+        tags:       ['website', 'phone-verified', `email-${proof.emailResult.status}`, leadTag(leadSource)].filter(Boolean),
         customFields: [
           recordId    ? { id: 'S1KufkT83xxvvbPh4RAk', fieldValue: recordId }    : null,
           reviewUrl   ? { id: '7Fk4WaOYtd3AjtNSgTPv', fieldValue: reviewUrl }   : null,
