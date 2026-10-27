@@ -64,7 +64,7 @@ window.ContactValidation = (() => {
       loadUtils: () => import('/vendor/intl-tel-input/js/utils.js'),
     });
     instances.set(id, instance);
-    smsNotes.set(id, options.smsNote || 'SMS verification is available for UK and Irish mobiles.');
+    smsNotes.set(id, options.smsNote || 'SMS verification is available for mobile numbers in most countries.');
     const emailInput = document.getElementById('f-email') || document.getElementById('p2-email');
     if (emailInput && !document.getElementById('icon-email')) {
       const wrap = document.createElement('div');

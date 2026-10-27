@@ -1312,11 +1312,11 @@
         if (id) {
           await fetch('/api/airtable-update', {
             method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ recordId: id, fields: { 'Url': `${location.origin}/page2?id=${encodeURIComponent(id)}` } }),
+            body: JSON.stringify({ recordId: id, fields: { 'Url': `${location.origin}/uae/page2?id=${encodeURIComponent(id)}` } }),
           }).catch(() => {});
         }
         if (typeof fbq !== 'undefined') fbq('track', 'Lead');
-        window.location.href = '/page2' + (id ? '?id=' + encodeURIComponent(id) : '');
+        window.location.href = '/uae/page2' + (id ? '?id=' + encodeURIComponent(id) : '');
       } catch (err) { showSubmitError(err.message); }
     }
     function showSubmitError(message) {

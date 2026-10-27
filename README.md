@@ -15,7 +15,7 @@ Copy `.env.example` to `.env.local` and configure the same server variables in V
 - `GHL_LOCATION_ID`: the Avantis location; existing field IDs in the contact APIs belong to this location.
 - `TWILIO_API_KEY`, `TWILIO_API_SECRET`, `TWILIO_ACCOUNT_SID`, `TWILIO_VERIFY_SERVICE_SID`: existing Verify service credentials. An account SID/auth-token pair is also supported if no API key is configured.
 - `VERIFICATION_SIGNING_SECRET`: at least 32 random characters, shared by all application instances.
-- `PHONE_ALLOWED_COUNTRIES`: comma-separated ISO country codes; defaults to `GB,IE`. The picker supports international numbers, while SMS destinations are restricted on the server. Adjust this list and Twilio Geo Permissions together for other markets.
+- `PHONE_ALLOWED_COUNTRIES`: optional comma-separated ISO country codes. Unset means every country is accepted, which is the intended setup. Only set it if you need to deliberately limit SMS destinations. Twilio Geo Permissions must also allow each country you want to send to.
 
 Run `npm ci`, then `npm run setup:twilio` once for the Verify service. This idempotently creates persistent Twilio service limits named `avantis_phone` (one send per 60 seconds, five per hour) and `avantis_ip` (20 sends per hour). Every SMS send includes both limit keys; Twilio enforces these across serverless instances. Keep Twilio Fraud Guard and Geo Permissions configured for the allowed markets. Verification checks also honor Twilio's attempt/expiry limits.
 

@@ -27,9 +27,12 @@ test('proof rejects tampering, expiry, changed email and phone', () => {
   assert.throws(() => validation.proofFor({ ...details, email: 'different@example.com', verificationToken: token }));
   assert.throws(() => validation.proofFor({ ...details, phone: '+447400123457', verificationToken: token }));
 });
-test('server rejects malformed, unsupported-country and landline numbers', () => {
-  for (const phone of ['07911123456', '+441234', '+12025550123', '+442079460123']) assert.throws(() => validation.phoneNumber(phone));
+test('server rejects malformed and landline numbers', () => {
+  for (const phone of ['07911123456', '+441234', '+442079460123']) assert.throws(() => validation.phoneNumber(phone));
   assert.equal(validation.phoneNumber(details.phone), details.phone);
+});
+test('server accepts mobile numbers from any country', () => {
+  for (const phone of ['+971501234567', '+12025550123']) assert.equal(validation.phoneNumber(phone), phone);
 });
 test('email decision table handles every documented result shape', async () => {
   for (const data of [{ result: 'undeliverable' }, { result: 'do_not_send' }, { isEmailValid: false }, { leadConnectorRecommendation: { isEmailValid: false } }]) {
