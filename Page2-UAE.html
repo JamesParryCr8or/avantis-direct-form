@@ -619,7 +619,7 @@
         'Country (Director\'s / Proprietor Address)':         val('p2-dir-country') || 'United Arab Emirates',
         'Status': "Director's Details Added",
         'Url': recordId
-          ? `https://avantis-direct-form.vercel.app/page3?id=${encodeURIComponent(recordId)}`
+          ? `https://avantis-direct-form.vercel.app/uae/page3?id=${encodeURIComponent(recordId)}`
           : undefined,
       };
       Object.keys(fields).forEach(k => fields[k] === undefined && delete fields[k]);
@@ -648,7 +648,7 @@
           fetch('/api/airtable-update', {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ recordId: id, fields: { 'Url': `https://avantis-direct-form.vercel.app/page3?id=${encodeURIComponent(id)}` } })
+            body: JSON.stringify({ recordId: id, fields: { 'Url': `https://avantis-direct-form.vercel.app/uae/page3?id=${encodeURIComponent(id)}` } })
           }).catch(() => {});
         }
 
@@ -684,7 +684,7 @@
               typeOfBusiness: fields['Type of business'],
               tradingLength:  fields['How long have you been trading for?'],
               siteAbandonUrl: p3Id
-                ? `https://avantis-direct-form.vercel.app/page3?id=${encodeURIComponent(p3Id)}`
+                ? `https://avantis-direct-form.vercel.app/uae/page3?id=${encodeURIComponent(p3Id)}`
                 : undefined,
             })
           });
@@ -693,7 +693,7 @@
         }
 
         if (typeof fbq !== 'undefined') fbq('track', 'CompleteRegistration');
-        window.location.href = '/page3?id=' + encodeURIComponent(id);
+        window.location.href = '/uae/page3?id=' + encodeURIComponent(id);
       } catch (err) {
         console.error('Submit error:', err);
         document.getElementById('loading-overlay').classList.remove('show');

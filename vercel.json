@@ -8,6 +8,7 @@
     { "source": "/review", "destination": "/Review.html" },
     { "source": "/uae", "destination": "/Form-UAE.html" },
     { "source": "/uae/page2", "destination": "/Page2-UAE.html" },
-    { "source": "/uae/gateways", "destination": "/Form-UAE-Gateways.html" }
+    { "source": "/uae/gateways", "destination": "/Form-UAE-Gateways.html" },
+    { "source": "/uae/page3", "destination": "/Page3-UAE.html" }
   ]
 }
