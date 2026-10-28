@@ -97,6 +97,7 @@
 
     .upload-label { font-size: 13px; font-weight: 700; color: #3a4a68; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
     .upload-label .req { color: var(--error); }
+    .upload-label .opt { font-size: 11px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--grey); }
     .upload-hint { font-size: 12px; color: var(--grey); line-height: 1.4; margin-bottom: 12px; }
 
     .file-drop {
@@ -209,12 +210,12 @@
         <div id="upload-form">
           <div class="page-header">
             <h2>Business Documents</h2>
-            <p>Please upload clear, readable copies. JPG, PNG or PDF accepted. Max 10MB per file.</p>
+            <p>Upload what you have now. Anything missing can be sent to us later. JPG, PNG or PDF accepted, max 10MB per file.</p>
           </div>
 
           <!-- PASSPORT -->
           <div class="upload-card" id="card-passport">
-            <div class="upload-label">🪪 Passport or Emirates ID <span class="req">*</span></div>
+            <div class="upload-label">🪪 Passport or Emirates ID <span class="opt">(optional)</span></div>
             <div class="upload-hint">Passport photo page, or both sides of your Emirates ID. All corners must be visible.</div>
             <div class="file-drop" id="drop-passport">
               <input type="file" id="file-passport" accept="image/*,.pdf" onchange="handleFile('passport', this)">
@@ -235,7 +236,7 @@
 
           <!-- UTILITY BILL -->
           <div class="upload-card" id="card-utility" style="display:none">
-            <div class="upload-label">🏠 Proof of Business Address <span class="req">*</span></div>
+            <div class="upload-label">🏠 Proof of Business Address <span class="opt">(optional)</span></div>
             <div class="upload-hint">Ejari tenancy contract or a DEWA bill, dated within the last 3 months.</div>
             <div class="file-drop" id="drop-utility">
               <input type="file" id="file-utility" accept="image/*,.pdf" onchange="handleFile('utility', this)">
@@ -256,7 +257,7 @@
 
           <!-- BANK STATEMENT -->
           <div class="upload-card" id="card-bank" style="display:none">
-            <div class="upload-label">🏦 Business Bank Statement <span class="req">*</span></div>
+            <div class="upload-label">🏦 Business Bank Statement <span class="opt">(optional)</span></div>
             <div class="upload-hint">Business bank statement from the last 3 months.</div>
             <div class="file-drop" id="drop-bank">
               <input type="file" id="file-bank" accept="image/*,.pdf" onchange="handleFile('bank', this)">
@@ -277,7 +278,7 @@
 
           <!-- BUSINESS UTILITY BILL -->
           <div class="upload-card" id="card-bizutil" style="display:none">
-            <div class="upload-label">📋 Trade Licence <span class="req">*</span></div>
+            <div class="upload-label">📋 Trade Licence <span class="opt">(optional)</span></div>
             <div class="upload-hint">Your current UAE trade licence.</div>
             <div class="file-drop" id="drop-bizutil">
               <input type="file" id="file-bizutil" accept="image/*,.pdf" onchange="handleFile('bizutil', this)">
@@ -424,18 +425,6 @@
     }
 
     async function submitDocuments() {
-      // Validate all required files are selected
-      const requiredKeys = soleTrader ? ['passport'] : ['passport', 'utility', 'bank', 'bizutil'];
-      let valid = true;
-      requiredKeys.forEach(key => {
-        if (!files[key]) {
-          document.getElementById('card-' + key).classList.add('has-error');
-          document.getElementById('err-' + key).classList.add('show');
-          valid = false;
-        }
-      });
-      if (!valid) return;
-
       if (!recordId) {
         alert('No application ID found. Please start from the beginning.');
         return;
@@ -449,6 +438,7 @@
       let allOk = true;
 
       for (const key of keys) {
+        if (!files[key]) continue; // optional: skip anything not chosen
         try {
           await uploadFile(key, files[key], recordId);
         } catch (err) {
